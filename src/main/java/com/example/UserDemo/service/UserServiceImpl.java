@@ -5,6 +5,8 @@ import com.example.UserDemo.dao.UserProfileDAO;
 import com.example.UserDemo.dto.CreateUserDTO;
 import com.example.UserDemo.dto.ResponseUserDTO;
 import com.example.UserDemo.dto.UpdateUserDTO;
+import com.example.UserDemo.exception.UserCreateException;
+import com.example.UserDemo.exception.UserNotFoundException;
 import com.example.UserDemo.model.User;
 import com.example.UserDemo.model.UserProfile;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,10 @@ public class UserServiceImpl implements UserService {
     public ResponseUserDTO createUser(CreateUserDTO createUserDTO) {
 
         User createdUser = createUserFromDTO(createUserDTO);
+        if(createdUser == null)
+        {
+            throw new UserCreateException("User not created Exception");
+        }
         UserProfile userProfile = createUserProfile(createdUser);
         userProfileDAO.createUserProfile(userProfile);
         ResponseUserDTO responseUserDTO = getUserResponseDTO(createdUser);
@@ -54,7 +60,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseUserDTO getUserById(int id) {
         System.out.println(id);
-        User user = userDao.getUserById(id);
+       User user = userDao.getUserById(id);
+       if(user==null)
+       {
+           throw new UserNotFoundException("User with UserId: "+id + " not found");
+       }
         return getUserResponseDTO(user);
     }
 
@@ -70,6 +80,11 @@ public class UserServiceImpl implements UserService {
         User updatedUser = userDao.updateUser(user);
 
         UserProfile userProfile = userProfileDAO.getUserProfileByUserId(updatedUser.getUserId());
+        if(userProfile ==null)
+        {
+            throw new UserNotFoundException(String.format("UserProfile with UserId %d not found.",updatedUser.getUserId()));
+        }
+
         String userName = updatedUser.getFirstName() + " " + updatedUser.getLastName();
         userProfile.setUserName(userName);
         userProfile.setUserEmail(updatedUser.getUserEmail());
@@ -98,6 +113,10 @@ public class UserServiceImpl implements UserService {
         user.setUpdatedAt( new Date(System.currentTimeMillis()));
 
         User createdUser = userDao.createUser(user);
+        if(createdUser == null)
+        {
+            throw new UserCreateException("User Not created Exception");
+        }
         return createdUser;
     }
 

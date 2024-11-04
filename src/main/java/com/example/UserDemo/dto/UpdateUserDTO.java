@@ -1,10 +1,25 @@
 package com.example.UserDemo.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+
 public class UpdateUserDTO {
+    @Positive
     private int userId;
+
+    @NotEmpty(message = "First Name is required")
     private String firstName;
+
+    @NotEmpty(message = "Last Name is required")
     private String lastName;
+
+    @NotEmpty(message = "password is required")
+    @Size(min = 6,max = 20,message = "Length of password should be between 6-20")
     private String password;
+
+    @Email
     private String userEmail;
 
     public int getUserId() {

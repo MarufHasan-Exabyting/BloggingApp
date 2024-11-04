@@ -3,9 +3,10 @@ package com.example.UserDemo.controller;
 import com.example.UserDemo.dto.CreateUserDTO;
 import com.example.UserDemo.dto.ResponseUserDTO;
 import com.example.UserDemo.dto.UpdateUserDTO;
-import com.example.UserDemo.model.User;
 import com.example.UserDemo.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,12 +22,9 @@ public class UserController {
     }
 
     @PostMapping("/")
-    public ResponseUserDTO createUser(@RequestBody CreateUserDTO user)
+    public ResponseUserDTO createUser(@Valid @RequestBody CreateUserDTO user)
     {
-        System.out.println("createUserDTO: " + user);
-        var response = userService.createUser(user);
-        System.out.println(response);
-        return response;
+        return userService.createUser(user);
     }
 
     @GetMapping("/")
@@ -36,19 +34,20 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseUserDTO getUserById(@PathVariable int id)
+    public ResponseUserDTO getUserById(@Valid @PathVariable int id)
     {
+        //System.out.println(bindingResult.getAllErrors());
         return userService.getUserById(id);
     }
 
     @PutMapping("/")
-    public ResponseUserDTO updateUser(@RequestBody UpdateUserDTO user)
+    public ResponseUserDTO updateUser(@Valid @RequestBody UpdateUserDTO user)
     {
         return userService.updateUser(user);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable int id)
+    public void deleteUser(@Valid @PathVariable int id)
     {
         userService.deleteUser(id);
     }

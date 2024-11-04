@@ -1,7 +1,6 @@
 package com.example.UserDemo.model;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.Date;
@@ -33,7 +32,7 @@ public class UserProfile {
     @JoinColumn(name = "fk_created_by")
     private User createdBy;
 
-    @OneToMany(mappedBy = "post_author_id", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "postAuthorId", fetch = FetchType.LAZY)
     List<BlogPost> blogPosts;
 
     public UserProfile() {

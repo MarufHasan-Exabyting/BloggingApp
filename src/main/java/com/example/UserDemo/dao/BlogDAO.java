@@ -9,7 +9,7 @@ public interface BlogDAO {
 
     List<BlogPost> getAllPosts();
 
-    List<BlogPost> getPostByTitle(String Title);
+    List<BlogPost> getAllPosts(String title, String authorName, String Category);
 
     List<BlogPost> getPostByCategory(String Category);
 

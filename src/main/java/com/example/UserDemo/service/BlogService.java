@@ -10,11 +10,7 @@ public interface BlogService {
 
     List<BlogPost> getAllPosts();
 
-    List<BlogPost> getPostByTitle(String Title);
-
-    List<BlogPost> getPostByCategory(String Category);
-
-    List<BlogPost> getPostByAuthor(String authorName);
+    List<BlogPost> getAllPosts(String title, String authorName, String category);
 
     BlogPost updatePost(BlogPost blogPost);
 
