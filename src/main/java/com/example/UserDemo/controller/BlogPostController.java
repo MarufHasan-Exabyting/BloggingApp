@@ -24,8 +24,8 @@ public class BlogPostController {
         return blogService.createBlogPost(createPostDTO);
     }
 
-    @GetMapping("/{authorName}")
-    public List<BlogPost> getBlogPostByUserProfileId(@PathVariable String authorName)
+    @GetMapping("/search/")
+    public List<BlogPost> getBlogPostByAuthorName(@RequestParam("authorName") String authorName)
     {
         System.out.println("Author Name : "+ authorName);
         return blogService.getPostByAuthor(authorName);

@@ -9,14 +9,14 @@ import jakarta.persistence.*;
 public class BlogPost {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "post_Id")
+    @Column(name = "post_id")
     private int postId;
 
     @Column(name = "post_title")
     private String postTitle;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fk_post_Author_Id")
+    @JoinColumn(name = "fk_post_author_id")
     @JsonIgnore
     private UserProfile postAuthorId;
 
@@ -33,7 +33,6 @@ public class BlogPost {
 
     @Column(name = "category")
     private String category;
-
 
     public BlogPost() {
     }

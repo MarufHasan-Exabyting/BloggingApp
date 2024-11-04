@@ -33,7 +33,7 @@ public class UserProfile {
     @JoinColumn(name = "fk_created_by")
     private User createdBy;
 
-    @OneToMany(mappedBy = "postAuthorId", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "post_author_id", fetch = FetchType.LAZY)
     List<BlogPost> blogPosts;
 
     public UserProfile() {
