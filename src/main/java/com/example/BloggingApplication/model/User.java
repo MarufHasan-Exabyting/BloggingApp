@@ -24,7 +24,7 @@ public class User {
     @Column(name = "email")
     private String userEmail;
 
-    //To Do
+/*    //To Do
     //created at
     //updated at should be in a separate class
     @Column(name = "created_at")
@@ -33,8 +33,10 @@ public class User {
 
     @Column(name = "updated_at")
     @Temporal(TemporalType.TIME)
-    private Date updatedAt;
+    private Date updatedAt;*/
 
+    @Embedded
+    EntityMetadata metadata;
 
     public User() {
     }
@@ -46,22 +48,6 @@ public class User {
         this.lastName = lastName;
         this.password = password;
         this.userEmail = userEmail;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
     }
 
     public String getFirstName() {
@@ -102,5 +88,25 @@ public class User {
 
     public void setUserEmail(String userEmail) {
         this.userEmail = userEmail;
+    }
+
+    public EntityMetadata getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(EntityMetadata metadata) {
+        this.metadata = metadata;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "userId=" + userId +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", password='" + password + '\'' +
+                ", userEmail='" + userEmail + '\'' +
+                ", metadata=" + metadata +
+                '}';
     }
 }

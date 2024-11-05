@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+
 @Repository
 public class BlogDAOImpl implements BlogDAO{
     private EntityManager entityManager;
@@ -35,6 +36,65 @@ public class BlogDAOImpl implements BlogDAO{
 
     @Override
     public List<BlogPost> getAllPosts(String title, String authorName, String category) {
+        TypedQuery<BlogPost> query = getAllPostsQuery(title,authorName,category);
+        return query.getResultList();
+    }
+
+
+
+
+    @Override
+    public List<BlogPost> getPostByCategory(String postCategory) {
+        String query = Common.getDynamicQuery(BlogPost.class,"category",postCategory);
+        TypedQuery<BlogPost> typedQuery = entityManager.createQuery(query,BlogPost.class);
+        return typedQuery.getResultList();
+    }
+
+    @Override
+    public List<BlogPost> getPostByAuthor(String authorName) {
+        UserProfile userProfile = getUserProfileByUserName(authorName);
+        String query = Common.getDynamicQuery(BlogPost.class,"postAuthorId", userProfile);
+        TypedQuery<BlogPost> blogPostTypedQuery = entityManager.createQuery(query,BlogPost.class);
+        return blogPostTypedQuery.getResultList();
+    }
+
+    @Override
+    public BlogPost updatePost(BlogPost blogPost) {
+        BlogPost previousBlog = getBlogPostByPostId(blogPost.getPostId());
+        EntityMetadata metadata = Common.getEntityMetadata(previousBlog.getMetadata().getCreatedAt(), new Date(System.currentTimeMillis()));
+        blogPost.setMetadata(metadata);
+        entityManager.merge(blogPost);
+        return blogPost;
+    }
+
+    @Override
+    public void deletePostById(int postId) {
+        String query = Common.getDynamicQuery(BlogPost.class,"postId",postId);
+        TypedQuery<BlogPost> typedQuery = entityManager.createQuery(query, BlogPost.class);
+        BlogPost blogPost = typedQuery.getSingleResult();
+        entityManager.remove(blogPost);
+    }
+
+    //****
+    //Helper Methods
+    //***
+    private UserProfile getUserProfileByUserName(String userName)
+    {
+        String query = Common.getDynamicQuery(UserProfile.class,"userName",userName);
+        TypedQuery<UserProfile> userProfileTypedQuery = entityManager.createQuery(query, UserProfile.class);
+
+        return userProfileTypedQuery.getSingleResult();
+    }
+
+    private BlogPost getBlogPostByPostId(int postId)
+    {
+        String query = Common.getDynamicQuery(BlogPost.class,"postId",postId);
+        TypedQuery<BlogPost> blogPostTypedQuery = entityManager.createQuery(query, BlogPost.class);
+        return blogPostTypedQuery.getSingleResult();
+    }
+
+    private TypedQuery<BlogPost> getAllPostsQuery(String title, String authorName, String category)
+    {
         //should be in separate utility function
         //1=1 is added for the condition to be true always
         //so that AND condition can be appended
@@ -72,54 +132,6 @@ public class BlogDAOImpl implements BlogDAO{
         {
             query.setParameter(i+1,parameters.get(i));
         }
-
-        return query.getResultList();
-    }
-
-    @Override
-    public List<BlogPost> getPostByCategory(String postCategory) {
-        //dynamic query should be in a separate utility functions
-        TypedQuery<BlogPost> query = entityManager.createQuery("From BlogPost where category = :blog_category",BlogPost.class);
-        query.setParameter("blog_category",postCategory);
-        return query.getResultList();
-    }
-
-    @Override
-    public List<BlogPost> getPostByAuthor(String authorName) {
-        TypedQuery<UserProfile> query = entityManager.createQuery("From UserProfile where userName = :userProfileName",UserProfile.class);
-        query.setParameter("userProfileName",authorName);
-
-        List<UserProfile> userProfiles = query.getResultList();
-        UserProfile userProfile = userProfiles.getFirst();
-
-        TypedQuery<BlogPost> blogPostTypedQuery = entityManager.createQuery("From BlogPost where postAuthorId = :userProfile",BlogPost.class);
-        blogPostTypedQuery.setParameter("userProfile",userProfile);
-
-        return blogPostTypedQuery.getResultList();
-    }
-
-    @Override
-    public BlogPost updatePost(BlogPost blogPost) {
-
-        TypedQuery<BlogPost> blogPostTypedQuery = entityManager.createQuery("From BlogPost where postId = :blogpostId", BlogPost.class);
-        blogPostTypedQuery.setParameter("blogpostId",blogPost.getPostId());
-
-        BlogPost previousBlog = blogPostTypedQuery.getSingleResult();
-
-        EntityMetadata metadata = new EntityMetadata();
-        metadata.setCreatedAt(previousBlog.getMetadata().getCreatedAt());
-        metadata.setUpdatedAt(new Date(System.currentTimeMillis()));
-        blogPost.setMetadata(metadata);
-
-        entityManager.merge(blogPost);
-        return blogPost;
-    }
-
-    @Override
-    public void deletePostById(int postId) {
-        TypedQuery<BlogPost> query = entityManager.createQuery("From BlogPost where postId = :post_id",BlogPost.class);
-        query.setParameter("post_id",postId);
-        BlogPost blogPost = query.getResultList().getFirst();
-        entityManager.remove(blogPost);
+        return query;
     }
 }

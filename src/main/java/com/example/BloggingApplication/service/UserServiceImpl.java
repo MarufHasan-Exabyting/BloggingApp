@@ -1,5 +1,6 @@
 package com.example.BloggingApplication.service;
 
+import com.example.BloggingApplication.dao.Common;
 import com.example.BloggingApplication.dao.UserDAO;
 import com.example.BloggingApplication.dao.UserProfileDAO;
 import com.example.BloggingApplication.dto.CreateUserDTO;
@@ -7,6 +8,7 @@ import com.example.BloggingApplication.dto.ResponseUserDTO;
 import com.example.BloggingApplication.dto.UpdateUserDTO;
 import com.example.BloggingApplication.exception.UserCreateException;
 import com.example.BloggingApplication.exception.UserNotFoundException;
+import com.example.BloggingApplication.model.EntityMetadata;
 import com.example.BloggingApplication.model.User;
 import com.example.BloggingApplication.model.UserProfile;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,7 +90,9 @@ public class UserServiceImpl implements UserService {
         String userName = updatedUser.getFirstName() + " " + updatedUser.getLastName();
         userProfile.setUserName(userName);
         userProfile.setUserEmail(updatedUser.getUserEmail());
-        userProfile.setUpdatedAt(new Date(System.currentTimeMillis()));
+        EntityMetadata metadata = userProfile.getMetadata();
+        metadata.setUpdatedAt(new Date(System.currentTimeMillis()));
+        userProfile.setMetadata(metadata);
         userProfileDAO.updateUserProfile(userProfile);
 
         return getUserResponseDTO(updatedUser);
@@ -109,8 +113,9 @@ public class UserServiceImpl implements UserService {
         user.setLastName(createUserDTO.getLastName());
         user.setPassword(createUserDTO.getPassword());
         user.setUserEmail(createUserDTO.getUserEmail());
-        user.setCreatedAt( new Date(System.currentTimeMillis()));
-        user.setUpdatedAt( new Date(System.currentTimeMillis()));
+
+        EntityMetadata metadata = Common.getEntityMetadata(new Date(System.currentTimeMillis()), new Date(System.currentTimeMillis()));
+        user.setMetadata(metadata);
 
         User createdUser = userDao.createUser(user);
         if(createdUser == null)
@@ -125,8 +130,7 @@ public class UserServiceImpl implements UserService {
         String userName = createdUser.getFirstName() + " " + createdUser.getLastName();
         userProfile.setUserName(userName);
         userProfile.setUserEmail(createdUser.getUserEmail());
-        userProfile.setCreatedAt(createdUser.getCreatedAt());
-        userProfile.setUpdatedAt(createdUser.getUpdatedAt());
+        userProfile.setMetadata(createdUser.getMetadata());
         userProfile.setCreatedBy(createdUser);
         return userProfile;
     }
@@ -137,8 +141,8 @@ public class UserServiceImpl implements UserService {
         responseUserDTO.setFirstName(createdUser.getFirstName());
         responseUserDTO.setLastName(createdUser.getLastName());
         responseUserDTO.setUserEmail(createdUser.getUserEmail());
-        responseUserDTO.setCreated_at(createdUser.getCreatedAt());
-        responseUserDTO.setUpdated_at(createdUser.getUpdatedAt());
+        responseUserDTO.setCreated_at(createdUser.getMetadata().getCreatedAt());
+        responseUserDTO.setUpdated_at(createdUser.getMetadata().getUpdatedAt());
         return responseUserDTO;
     }
 }

@@ -20,13 +20,16 @@ public class UserProfile {
     //To Do
     //created at
     //updated at should be in a separate class
-    @Column(name = "created_at")
+   /* @Column(name = "created_at")
     @Temporal(TemporalType.TIME)
     private Date createdAt;
 
     @Column(name = "updated_at")
     @Temporal(TemporalType.TIME)
-    private Date updatedAt;
+    private Date updatedAt;*/
+
+    @Embedded
+    private EntityMetadata metadata;
 
     @Column(name = "email")
     private String userEmail;
@@ -41,11 +44,10 @@ public class UserProfile {
     public UserProfile() {
     }
 
-    public UserProfile(int userProfileId, String userName, Date createdAt, Date updatedAt, String userEmail, User createdBy, List<BlogPost> blogPosts) {
+    public UserProfile(int userProfileId, String userName, EntityMetadata metadata, String userEmail, User createdBy, List<BlogPost> blogPosts) {
         this.userProfileId = userProfileId;
         this.userName = userName;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
+        this.metadata = metadata;
         this.userEmail = userEmail;
         this.createdBy = createdBy;
         this.blogPosts = blogPosts;
@@ -57,22 +59,6 @@ public class UserProfile {
 
     public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
     }
 
     public int getUserProfileId() {
@@ -105,5 +91,13 @@ public class UserProfile {
 
     public void setUserEmail(String userEmail) {
         this.userEmail = userEmail;
+    }
+
+    public EntityMetadata getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(EntityMetadata metadata) {
+        this.metadata = metadata;
     }
 }

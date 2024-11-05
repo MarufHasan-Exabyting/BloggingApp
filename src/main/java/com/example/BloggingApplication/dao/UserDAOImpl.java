@@ -39,8 +39,7 @@ public class UserDAOImpl implements UserDAO {
     @Override
     public User updateUser(User user) {
         User user_beforeUpdate = entityManager.find(User.class,user.getUserId());
-        user.setCreatedAt(user_beforeUpdate.getCreatedAt());
-        user.setUpdatedAt(new Date(System.currentTimeMillis()));
+        user.setMetadata(user_beforeUpdate.getMetadata());
         entityManager.merge(user);
         return entityManager.find(User.class,user.getUserId());
     }
