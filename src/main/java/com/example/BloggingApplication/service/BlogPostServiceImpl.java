@@ -4,7 +4,6 @@ import com.example.BloggingApplication.dao.BlogDAO;
 import com.example.BloggingApplication.dao.UserProfileDAO;
 import com.example.BloggingApplication.dto.CreatePostDTO;
 import com.example.BloggingApplication.dto.UpdatePostDTO;
-import com.example.BloggingApplication.exception.UserProfileCreateException;
 import com.example.BloggingApplication.model.BlogPost;
 import com.example.BloggingApplication.model.EntityMetadata;
 import com.example.BloggingApplication.model.UserProfile;
@@ -55,8 +54,8 @@ public class BlogPostServiceImpl implements BlogService{
 
     @Transactional
     @Override
-    public void deletePostById(int postId) {
-        blogDAO.deletePostById(postId);
+    public int deletePostById(int postId) {
+        return blogDAO.deletePostById(postId);
     }
 
     //HelperFunction

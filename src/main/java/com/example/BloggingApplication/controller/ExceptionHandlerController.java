@@ -1,50 +1,40 @@
 package com.example.BloggingApplication.controller;
 
-import com.example.BloggingApplication.exception.ErrorDetails;
+import com.example.BloggingApplication.dto.ApiResponse;
 import com.example.BloggingApplication.exception.ResourceNotFoundException;
 import com.example.BloggingApplication.exception.UserNotFoundException;
 import com.example.BloggingApplication.exception.UserProfileNotFoundException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.ObjectError;
+import com.example.BloggingApplication.util.ResponseUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Arrays;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class ExceptionHandlerController {
-    @ExceptionHandler
-    public ResponseEntity<ResourceNotFoundException> handleException(ResourceNotFoundException exception)
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ApiResponse<Object> handleException(ResourceNotFoundException exception, HttpServletRequest request)
     {
-        return new ResponseEntity<>(exception, HttpStatus.NOT_FOUND);
+        return ResponseUtil.error(Arrays.asList(exception.getMessage()),"Exception occured",400, request.getRequestURI());
     }
 
-    @ExceptionHandler
-    public ResponseEntity<UserNotFoundException> handleException(UserNotFoundException userNotFoundException)
+    @ExceptionHandler(UserNotFoundException.class)
+    public ApiResponse<Object> handleException(UserNotFoundException userNotFoundException, HttpServletRequest request)
     {
-        return new ResponseEntity<>(userNotFoundException,HttpStatus.NOT_FOUND);
+        return  ResponseUtil.error(Arrays.asList(userNotFoundException.getMessage()),"User not Found ", 404, request.getRequestURI());
     }
 
-    @ExceptionHandler
-    public ResponseEntity<UserProfileNotFoundException> handleException(UserProfileNotFoundException userProfileNotFoundException)
+    @ExceptionHandler(UserProfileNotFoundException.class)
+    public ApiResponse<Object> handleException(UserProfileNotFoundException userProfileNotFoundException, HttpServletRequest request)
     {
-        return new ResponseEntity<>(userProfileNotFoundException,HttpStatus.NOT_FOUND);
+        return  ResponseUtil.error(Arrays.asList(userProfileNotFoundException.getMessage()),"UserProfile not Found ", 404, request.getRequestURI());
     }
 
-    @ExceptionHandler
-    public ResponseEntity<Map<String,String>> handleValidationException(MethodArgumentNotValidException methodArgumentNotValidException)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ApiResponse<Object> handleValidationException(MethodArgumentNotValidException methodArgumentNotValidException, HttpServletRequest request)
     {
-        Map<String,String> errorMap = new HashMap<>();
-        ErrorDetails errorDetails = new ErrorDetails();
-        List<String> errors = methodArgumentNotValidException.getAllErrors().stream().map(
-                ObjectError::toString).toList();
-        errorDetails.setMessage("Validation Failed");
-        errorDetails.setStatus(HttpStatus.BAD_REQUEST);
-        errorMap.putIfAbsent("Error",errorDetails.toString());
-        return new ResponseEntity<>(errorMap,HttpStatus.BAD_REQUEST);
+        return ResponseUtil.error(Arrays.asList(methodArgumentNotValidException.getMessage()),"Validation Error",404, request.getRequestURI());
     }
 }

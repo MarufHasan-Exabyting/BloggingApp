@@ -2,7 +2,6 @@ package com.example.BloggingApplication.model;
 
 import jakarta.persistence.*;
 
-import java.util.Date;
 
 @Entity
 @Table(name = "blog_user")
@@ -23,17 +22,6 @@ public class User {
 
     @Column(name = "email")
     private String userEmail;
-
-/*    //To Do
-    //created at
-    //updated at should be in a separate class
-    @Column(name = "created_at")
-    @Temporal(TemporalType.TIME)
-    private Date createdAt;
-
-    @Column(name = "updated_at")
-    @Temporal(TemporalType.TIME)
-    private Date updatedAt;*/
 
     @Embedded
     EntityMetadata metadata;

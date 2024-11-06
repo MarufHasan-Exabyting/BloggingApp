@@ -6,17 +6,14 @@ import com.example.BloggingApplication.dao.UserProfileDAO;
 import com.example.BloggingApplication.dto.CreateUserDTO;
 import com.example.BloggingApplication.dto.ResponseUserDTO;
 import com.example.BloggingApplication.dto.UpdateUserDTO;
-import com.example.BloggingApplication.exception.ErrorDetails;
 import com.example.BloggingApplication.exception.UserCreateException;
 import com.example.BloggingApplication.exception.UserNotFoundException;
 import com.example.BloggingApplication.model.EntityMetadata;
 import com.example.BloggingApplication.model.User;
 import com.example.BloggingApplication.model.UserProfile;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -33,7 +30,7 @@ public class UserServiceImpl implements UserService {
         this.userDao = userDao;
         this.userProfileDAO = userProfileDAO;
     }
-    //ok
+
     @Override
     @Transactional
     public ResponseUserDTO createUser(CreateUserDTO createUserDTO) {
@@ -45,11 +42,9 @@ public class UserServiceImpl implements UserService {
         }
         UserProfile userProfile = createUserProfile(createdUser);
         userProfileDAO.createUserProfile(userProfile);
-        ResponseUserDTO responseUserDTO = getUserResponseDTO(createdUser);
-        return responseUserDTO;
+        return getUserResponseDTO(createdUser);
     }
 
-    //Ok
     @Override
     public List<ResponseUserDTO> getAllUsers() {
         List<User> users =  userDao.getAllUsers();
@@ -65,56 +60,43 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseUserDTO getUserById(int id) {
-        System.out.println(id);
        User user = userDao.getUserById(id);
-       if(user==null)
+
+       if(user == null)
        {
-           throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-           //throw new UserNotFoundException("User with UserId: "+id + " not found");
+           throw new UserNotFoundException("User with UserId: "+id + " not found");
        }
-        return getUserResponseDTO(user);
+
+       return getUserResponseDTO(user);
     }
 
     @Override
     @Transactional
     public ResponseUserDTO updateUser(UpdateUserDTO updateUserDTO) {
-        User user = new User();
-        user.setUserId(updateUserDTO.getUserId());
-        user.setFirstName(updateUserDTO.getFirstName());
-        user.setLastName(updateUserDTO.getLastName());
-        user.setPassword(updateUserDTO.getPassword());
-        user.setUserEmail(updateUserDTO.getUserEmail());
+        User user = getUserFromUpdateUserDTO(updateUserDTO);
         User updatedUser = userDao.updateUser(user);
 
         EntityMetadata entityMetadata = Common.getEntityMetadata(updatedUser.getMetadata().getCreatedAt(),new Date(System.currentTimeMillis()));
-
         updatedUser.setMetadata(entityMetadata);
 
         UserProfile userProfile = userProfileDAO.getUserProfileByUserId(updatedUser.getUserId());
-        if(userProfile ==null)
+        if(userProfile == null)
         {
             throw new UserNotFoundException(String.format("UserProfile with UserId %d not found.",updatedUser.getUserId()));
         }
 
-        String userName = updatedUser.getFirstName() + " " + updatedUser.getLastName();
-        userProfile.setUserName(userName);
-        userProfile.setUserEmail(updatedUser.getUserEmail());
-        EntityMetadata metadata = userProfile.getMetadata();
-        metadata.setUpdatedAt(new Date(System.currentTimeMillis()));
-        userProfile.setMetadata(metadata);
-        userProfileDAO.updateUserProfile(userProfile);
-        System.out.println("Hello Here");
+        UserProfile updatedUserProfile = getUpdatedUserProfileFromUpdatedUser(userProfile, updatedUser);
+        userProfileDAO.updateUserProfile(updatedUserProfile);
 
         return getUserResponseDTO(updatedUser);
     }
 
     @Override
     @Transactional
-    public void deleteUser(int id) {
+    public int deleteUser(int id) {
         userProfileDAO.deleteUserProfileByUserId(id);
-        userDao.deleteUser(id);
+        return userDao.deleteUser(id);
     }
-
 
     //Helper functions
     public User createUserFromDTO(CreateUserDTO createUserDTO)
@@ -136,6 +118,7 @@ public class UserServiceImpl implements UserService {
         return createdUser;
     }
 
+
     private UserProfile createUserProfile(User createdUser) {
         UserProfile userProfile = new UserProfile();
         String userName = createdUser.getFirstName() + " " + createdUser.getLastName();
@@ -155,5 +138,27 @@ public class UserServiceImpl implements UserService {
         responseUserDTO.setCreated_at(createdUser.getMetadata().getCreatedAt());
         responseUserDTO.setUpdated_at(createdUser.getMetadata().getUpdatedAt());
         return responseUserDTO;
+    }
+
+    private User getUserFromUpdateUserDTO(UpdateUserDTO updateUserDTO)
+    {
+        User user = new User();
+        user.setUserId(updateUserDTO.getUserId());
+        user.setFirstName(updateUserDTO.getFirstName());
+        user.setLastName(updateUserDTO.getLastName());
+        user.setPassword(updateUserDTO.getPassword());
+        user.setUserEmail(updateUserDTO.getUserEmail());
+        return user;
+    }
+
+    private UserProfile getUpdatedUserProfileFromUpdatedUser(UserProfile userProfile, User updatedUser)
+    {
+        String userName = updatedUser.getFirstName() + " " + updatedUser.getLastName();
+        userProfile.setUserName(userName);
+        userProfile.setUserEmail(updatedUser.getUserEmail());
+        EntityMetadata metadata = userProfile.getMetadata();
+        metadata.setUpdatedAt(new Date(System.currentTimeMillis()));
+        userProfile.setMetadata(metadata);
+        return userProfile;
     }
 }

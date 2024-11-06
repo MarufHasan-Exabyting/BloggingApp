@@ -1,11 +1,15 @@
 package com.example.BloggingApplication.controller;
 
+import com.example.BloggingApplication.dto.ApiResponse;
 import com.example.BloggingApplication.dto.CreateUserDTO;
 import com.example.BloggingApplication.dto.ResponseUserDTO;
 import com.example.BloggingApplication.dto.UpdateUserDTO;
 import com.example.BloggingApplication.service.UserService;
+import com.example.BloggingApplication.util.ResponseUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,36 +24,38 @@ public class UserController {
         this.userService = userService;
     }
 
-    //ok
     @PostMapping("/")
-    public ResponseUserDTO createUser(@Valid @RequestBody CreateUserDTO user)
+    public ResponseEntity<ApiResponse<ResponseUserDTO> >  createUser(@Valid @RequestBody CreateUserDTO user, HttpServletRequest request)
     {
-        return userService.createUser(user);
-    }
-    //ok
-    @GetMapping("/")
-    public List<ResponseUserDTO> getAllUsers()
-    {
-        return userService.getAllUsers();
-    }
-    //ok
-    @GetMapping("/{id}")
-    public ResponseUserDTO getUserById(@Valid @PathVariable int id)
-    {
-        //System.out.println(bindingResult.getAllErrors());
-        return userService.getUserById(id);
-    }
-    //ok
-    @PutMapping("/")
-    public ResponseUserDTO updateUser(@Valid @RequestBody UpdateUserDTO user)
-    {
-        return userService.updateUser(user);
+        ResponseUserDTO responseUserDTO = userService.createUser(user);
+        return ResponseEntity.ok(ResponseUtil.success(responseUserDTO,"User created successfully", request.getRequestURI()));
     }
 
-    //ok
-    @DeleteMapping("/{id}")
-    public void deleteUser(@Valid @PathVariable int id)
+    @GetMapping("/")
+    public ResponseEntity<ApiResponse<List<ResponseUserDTO>> > getAllUsers(HttpServletRequest request)
     {
-        userService.deleteUser(id);
+        List<ResponseUserDTO> responseUserDTOS = userService.getAllUsers();
+        return ResponseEntity.ok(ResponseUtil.success(responseUserDTOS, "Successfully fetched all users", request.getRequestURI()));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<ResponseUserDTO> > getUserById(@Valid @PathVariable int id, HttpServletRequest request)
+    {
+        ResponseUserDTO responseUserDTO = userService.getUserById(id);
+        return ResponseEntity.ok(ResponseUtil.success(responseUserDTO, String.format("User with Id : %d successfully retrived",id),request.getRequestURI()));
+    }
+
+    @PutMapping("/")
+    public ResponseEntity<ApiResponse<ResponseUserDTO> > updateUser(@Valid @RequestBody UpdateUserDTO user, HttpServletRequest request)
+    {
+        ResponseUserDTO responseUserDTO = userService.updateUser(user);
+        return ResponseEntity.ok(ResponseUtil.success(responseUserDTO, String.format("Succesflly updated the user with userId: %d",user.getUserId()),request.getRequestURI()));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Integer>> deleteUser(@Valid @PathVariable int id, HttpServletRequest request)
+    {
+        int deletedCount = userService.deleteUser(id);
+        return ResponseEntity.ok(ResponseUtil.success(deletedCount,String.format("The user with User Id : %d deleted successfully",id),request.getRequestURI()));
     }
 }

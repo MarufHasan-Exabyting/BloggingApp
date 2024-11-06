@@ -15,5 +15,5 @@ public interface BlogService {
 
     BlogPost updatePost(UpdatePostDTO blogPost);
 
-    void deletePostById(int postId);
+    int deletePostById(int postId);
 }

@@ -1,6 +1,7 @@
 package com.example.BloggingApplication.dao;
 
-import com.example.BloggingApplication.model.BlogPost;
+import com.example.BloggingApplication.exception.UserNotFoundException;
+import com.example.BloggingApplication.exception.UserProfileNotFoundException;
 import com.example.BloggingApplication.model.User;
 import com.example.BloggingApplication.model.UserProfile;
 import jakarta.persistence.EntityManager;
@@ -37,9 +38,6 @@ public class UserProfileDAOImpl implements UserProfileDAO{
     @Override
     public UserProfile getUserProfileByUserId(int userId) {
         User user = entityManager.find(User.class,userId);
-        //String query = Common.getDynamicQuery(UserProfile.class,"createdBy",user);
-        //System.out.println("User Id "+userId);
-        //System.out.println("Query: "+query);
         TypedQuery<UserProfile> typedQuery = entityManager.createQuery ("From UserProfile where createdBy = :user", UserProfile.class);
         typedQuery.setParameter("user",user);
         List<UserProfile> userProfiles = typedQuery.getResultList();
@@ -61,24 +59,61 @@ public class UserProfileDAOImpl implements UserProfileDAO{
 
     @Override
     public void deleteUserProfileByUserId(int userId) {
+        //First the related blogposts need
+        //to be deleted as userprofile is used
+        //as a foreign key in blogpost
+
         //get user
-        String query = Common.getDynamicQuery(User.class,"userId",userId);
-        User deletedUser = (entityManager.createQuery(query, User.class)).getSingleResult();
+        User deletedUser = getUserByUserId(userId);
 
         //get userProfile
-        TypedQuery<UserProfile> userProfileTypedQuery = (entityManager.createQuery("From UserProfile where createdBy = :deletedUser",UserProfile.class));
-        userProfileTypedQuery.setParameter("deletedUser",deletedUser);
-        UserProfile userProfile =  userProfileTypedQuery.getSingleResult();
+        UserProfile userProfile = getUserProfileByUser(deletedUser);
 
         //delete blogPost
+
+        deleteBlogPostByUserProfile(userProfile);
+
+        //delete UserProfile
+        deleteUserProfileByUser(deletedUser);
+    }
+
+    //Helper class
+    //get user by userId
+
+    private User getUserByUserId(int userId)
+    {
+        String query = Common.getDynamicQuery(User.class,"userId",userId);
+        List<User> deletedUsers = (entityManager.createQuery(query, User.class)).getResultList();
+        if(deletedUsers.isEmpty())
+        {
+            throw new UserNotFoundException(String.format("User with User Id : %d already deleted",userId));
+        }
+        return deletedUsers.getFirst();
+    }
+
+    private UserProfile getUserProfileByUser(User deletedUser)
+    {
+        TypedQuery<UserProfile> userProfileTypedQuery = (entityManager.createQuery("From UserProfile where createdBy = :deletedUser",UserProfile.class));
+        userProfileTypedQuery.setParameter("deletedUser",deletedUser);
+        List<UserProfile> userProfiles =  userProfileTypedQuery.getResultList();
+        if(userProfiles == null)
+        {
+            throw new UserProfileNotFoundException(String.format("User Profile with User Id : %d not found",deletedUser.getUserId()));
+        }
+        return userProfiles.getFirst();
+    }
+
+    private void deleteBlogPostByUserProfile(UserProfile userProfile)
+    {
         Query blogPostDeleteQuery = entityManager.createQuery("Delete From BlogPost where postAuthorId = : deletedUserProfile");
         blogPostDeleteQuery.setParameter("deletedUserProfile",userProfile);
         blogPostDeleteQuery.executeUpdate();
+    }
 
-        //delete UserProfile
+    private void deleteUserProfileByUser(User user)
+    {
         Query typedquery = entityManager.createQuery("Delete From UserProfile where createdBy = : deletedUser");
-        typedquery.setParameter("deletedUser",deletedUser);
+        typedquery.setParameter("deletedUser",user);
         typedquery.executeUpdate();
-        System.out.println("Done userProfile delete");
     }
 }

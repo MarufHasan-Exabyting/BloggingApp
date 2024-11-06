@@ -16,5 +16,5 @@ public interface UserService {
 
     public ResponseUserDTO updateUser(UpdateUserDTO user);
 
-    public void deleteUser(int id);
+    public int deleteUser(int id);
 }

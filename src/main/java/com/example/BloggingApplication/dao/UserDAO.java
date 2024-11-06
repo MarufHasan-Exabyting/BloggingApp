@@ -13,5 +13,5 @@ public interface UserDAO {
 
     User updateUser(User user);
 
-    void deleteUser(int id);
+    int deleteUser(int id);
 }

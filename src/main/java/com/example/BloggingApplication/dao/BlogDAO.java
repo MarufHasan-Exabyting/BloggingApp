@@ -17,5 +17,5 @@ public interface BlogDAO {
 
     BlogPost updatePost(BlogPost blogPost);
 
-    void deletePostById(int postId);
+    int deletePostById(int postId);
 }

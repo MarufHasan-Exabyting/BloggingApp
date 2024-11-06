@@ -6,7 +6,6 @@ import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -45,8 +44,16 @@ public class UserDAOImpl implements UserDAO {
     }
 
     @Override
-    public void deleteUser(int id) {
+    public int deleteUser(int id) {
+
         User user = entityManager.find(User.class,id);
+        if(user == null)
+        {
+            System.out.println("Null");
+        }
+
+        System.out.println(user);
         entityManager.remove(user);
+        return 1;
     }
 }

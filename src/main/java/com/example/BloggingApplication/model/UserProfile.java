@@ -1,10 +1,8 @@
 package com.example.BloggingApplication.model;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -17,17 +15,6 @@ public class UserProfile {
     
     @Column(name = "name")
     private String userName;
-
-    //To Do
-    //created at
-    //updated at should be in a separate class
-   /* @Column(name = "created_at")
-    @Temporal(TemporalType.TIME)
-    private Date createdAt;
-
-    @Column(name = "updated_at")
-    @Temporal(TemporalType.TIME)
-    private Date updatedAt;*/
 
     @Embedded
     private EntityMetadata metadata;

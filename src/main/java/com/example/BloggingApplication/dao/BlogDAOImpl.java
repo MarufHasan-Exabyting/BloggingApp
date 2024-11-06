@@ -68,13 +68,11 @@ public class BlogDAOImpl implements BlogDAO{
     }
 
     @Override
-    public void deletePostById(int postId) {
+    public int deletePostById(int postId) {
         String query = Common.getDynamicQuery(BlogPost.class,"postId",postId);
         System.out.println(query);
         query = "Delete " + query;
-        entityManager.createQuery(query).executeUpdate();
-        //BlogPost blogPost = typedQuery.getSingleResult();
-        //entityManager.remove(blogPost);
+        return entityManager.createQuery(query).executeUpdate();
     }
 
     //****
