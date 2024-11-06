@@ -42,7 +42,6 @@ public class ExceptionHandlerController {
         ErrorDetails errorDetails = new ErrorDetails();
         List<String> errors = methodArgumentNotValidException.getAllErrors().stream().map(
                 ObjectError::toString).toList();
-        errorDetails.setErrors(errors);
         errorDetails.setMessage("Validation Failed");
         errorDetails.setStatus(HttpStatus.BAD_REQUEST);
         errorMap.putIfAbsent("Error",errorDetails.toString());

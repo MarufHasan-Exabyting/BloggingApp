@@ -2,20 +2,21 @@ package com.example.BloggingApplication.exception;
 
 import org.springframework.http.HttpStatus;
 
+import java.util.Date;
 import java.util.List;
 
 public class ErrorDetails {
     private HttpStatus status;
     private String message;
-    private List<String> errors;
+    private Date timeStamp;
 
     public ErrorDetails() {
     }
 
-    public ErrorDetails(HttpStatus status, String message, List<String> errors) {
+    public ErrorDetails(HttpStatus status, String message, Date timeStamp) {
         this.status = status;
         this.message = message;
-        this.errors = errors;
+        this.timeStamp = timeStamp;
     }
 
     public HttpStatus getStatus() {
@@ -34,12 +35,12 @@ public class ErrorDetails {
         this.message = message;
     }
 
-    public List<String> getErrors() {
-        return errors;
+    public Date getTimeStamp() {
+        return timeStamp;
     }
 
-    public void setErrors(List<String> errors) {
-        this.errors = errors;
+    public void setTimeStamp(Date timeStamp) {
+        this.timeStamp = timeStamp;
     }
 
     @Override
@@ -47,7 +48,7 @@ public class ErrorDetails {
         return "ErrorDetails{" +
                 "status=" + status +
                 ", message='" + message + '\'' +
-                ", errors=" + errors +
+                ", timeStamp=" + timeStamp +
                 '}';
     }
 }

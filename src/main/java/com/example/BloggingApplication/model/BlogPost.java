@@ -16,12 +16,12 @@ public class BlogPost {
     @Column(name = "post_title")
     private String postTitle;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne()
     @JoinColumn(name = "fk_post_author_id")
     @JsonIgnore
     private UserProfile postAuthorId;
 
-    @Column(name = "content")
+    @Column(name = "content", length = 5000)
     private String content;
 
     @Column(name = "category")

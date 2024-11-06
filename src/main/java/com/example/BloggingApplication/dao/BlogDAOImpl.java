@@ -6,7 +6,9 @@ import com.example.BloggingApplication.model.UserProfile;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -37,11 +39,9 @@ public class BlogDAOImpl implements BlogDAO{
     @Override
     public List<BlogPost> getAllPosts(String title, String authorName, String category) {
         TypedQuery<BlogPost> query = getAllPostsQuery(title,authorName,category);
+        System.out.println("Here query for parameterized "+query);
         return query.getResultList();
     }
-
-
-
 
     @Override
     public List<BlogPost> getPostByCategory(String postCategory) {
@@ -70,9 +70,11 @@ public class BlogDAOImpl implements BlogDAO{
     @Override
     public void deletePostById(int postId) {
         String query = Common.getDynamicQuery(BlogPost.class,"postId",postId);
-        TypedQuery<BlogPost> typedQuery = entityManager.createQuery(query, BlogPost.class);
-        BlogPost blogPost = typedQuery.getSingleResult();
-        entityManager.remove(blogPost);
+        System.out.println(query);
+        query = "Delete " + query;
+        entityManager.createQuery(query).executeUpdate();
+        //BlogPost blogPost = typedQuery.getSingleResult();
+        //entityManager.remove(blogPost);
     }
 
     //****
@@ -80,22 +82,36 @@ public class BlogDAOImpl implements BlogDAO{
     //***
     private UserProfile getUserProfileByUserName(String userName)
     {
-        String query = Common.getDynamicQuery(UserProfile.class,"userName",userName);
+        //String query = Common.getDynamicQuery(UserProfile.class,"userName",userName);
+        String query = "From UserProfile where userName like :name" ;
+        System.out.println("GetUserProfileByUserName : "+query);
         TypedQuery<UserProfile> userProfileTypedQuery = entityManager.createQuery(query, UserProfile.class);
-
-        return userProfileTypedQuery.getSingleResult();
+        userProfileTypedQuery.setParameter("name",userName);
+        List<UserProfile> userProfiles = userProfileTypedQuery.getResultList();
+        if(userProfiles.isEmpty())
+        {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        else
+        {
+            return userProfiles.getFirst();
+        }
     }
 
     private BlogPost getBlogPostByPostId(int postId)
     {
         String query = Common.getDynamicQuery(BlogPost.class,"postId",postId);
         TypedQuery<BlogPost> blogPostTypedQuery = entityManager.createQuery(query, BlogPost.class);
+        List<BlogPost> blogPosts = blogPostTypedQuery.getResultList();
+        if(blogPosts.isEmpty())
+        {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Blog post with Id = %d not found",postId));
+        }
         return blogPostTypedQuery.getSingleResult();
     }
 
     private TypedQuery<BlogPost> getAllPostsQuery(String title, String authorName, String category)
     {
-        //should be in separate utility function
         //1=1 is added for the condition to be true always
         //so that AND condition can be appended
         StringBuilder jpql = new StringBuilder("From BlogPost where 1=1");
@@ -109,11 +125,14 @@ public class BlogDAOImpl implements BlogDAO{
             conditions.add(String.format("postTitle = ?%d",parameterIndex++));
             parameters.add(title);
         }
+
         if (authorName != null && !authorName.isEmpty())
         {
-            conditions.add(String.format("authorName = ?%d",parameterIndex++));
-            parameters.add(authorName);
+            conditions.add(String.format("postAuthorId = ?%d",parameterIndex++));
+            UserProfile userProfile = getUserProfileByUserName(authorName);
+            parameters.add(userProfile);
         }
+
         if(category != null && !category.isEmpty())
         {
             conditions.add(String.format("category = ?%d",parameterIndex++));
@@ -132,6 +151,7 @@ public class BlogDAOImpl implements BlogDAO{
         {
             query.setParameter(i+1,parameters.get(i));
         }
+
         return query;
     }
 }

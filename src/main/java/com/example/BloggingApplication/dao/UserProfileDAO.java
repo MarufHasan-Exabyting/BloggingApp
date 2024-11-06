@@ -11,5 +11,5 @@ public interface UserProfileDAO {
 
     UserProfile updateUserProfile(UserProfile userProfile);
 
-    UserProfile deleteUserProfileByUserId(int userId);
+    void deleteUserProfileByUserId(int userId);
 }

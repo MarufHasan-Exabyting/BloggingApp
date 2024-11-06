@@ -20,31 +20,33 @@ public class UserController {
         this.userService = userService;
     }
 
+    //ok
     @PostMapping("/")
     public ResponseUserDTO createUser(@Valid @RequestBody CreateUserDTO user)
     {
         return userService.createUser(user);
     }
-
+    //ok
     @GetMapping("/")
     public List<ResponseUserDTO> getAllUsers()
     {
         return userService.getAllUsers();
     }
-
+    //ok
     @GetMapping("/{id}")
     public ResponseUserDTO getUserById(@Valid @PathVariable int id)
     {
         //System.out.println(bindingResult.getAllErrors());
         return userService.getUserById(id);
     }
-
+    //ok
     @PutMapping("/")
     public ResponseUserDTO updateUser(@Valid @RequestBody UpdateUserDTO user)
     {
         return userService.updateUser(user);
     }
 
+    //ok
     @DeleteMapping("/{id}")
     public void deleteUser(@Valid @PathVariable int id)
     {

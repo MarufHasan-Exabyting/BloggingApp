@@ -1,13 +1,16 @@
 package com.example.BloggingApplication.dao;
 
+import com.example.BloggingApplication.model.BlogPost;
 import com.example.BloggingApplication.model.User;
 import com.example.BloggingApplication.model.UserProfile;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+
 
 @Repository
 public class UserProfileDAOImpl implements UserProfileDAO{
@@ -24,22 +27,30 @@ public class UserProfileDAOImpl implements UserProfileDAO{
         return userProfile;
     }
 
-    //dynamic query should be at a separate function
     @Override
     public UserProfile getUserProfileByName(String name) {
-        TypedQuery<UserProfile> query = entityManager.createQuery("From UserProfile where userName = :userProfileName",UserProfile.class);
-        query.setParameter("userProfileName",name);
-        List<UserProfile> userProfiles = query.getResultList();
-        return userProfiles.getFirst();
+        String query = Common.getDynamicQuery(UserProfile.class, "userName",name);
+        TypedQuery<UserProfile> typedquery = entityManager.createQuery(query,UserProfile.class);
+        return  typedquery.getSingleResult();
     }
 
     @Override
-    public UserProfile getUserProfileByUserId(int userid) {
-        TypedQuery<UserProfile> query = entityManager.createQuery ("From UserProfile where createdBy = :user", UserProfile.class);
-        User user = entityManager.find(User.class,userid);
-        query.setParameter("user",user);
-        List<UserProfile> userProfiles = query.getResultList();
-        return userProfiles.getFirst();
+    public UserProfile getUserProfileByUserId(int userId) {
+        User user = entityManager.find(User.class,userId);
+        //String query = Common.getDynamicQuery(UserProfile.class,"createdBy",user);
+        //System.out.println("User Id "+userId);
+        //System.out.println("Query: "+query);
+        TypedQuery<UserProfile> typedQuery = entityManager.createQuery ("From UserProfile where createdBy = :user", UserProfile.class);
+        typedQuery.setParameter("user",user);
+        List<UserProfile> userProfiles = typedQuery.getResultList();
+        if(userProfiles.isEmpty())
+        {
+            return null;
+        }
+        else
+        {
+            return userProfiles.getFirst();
+        }
     }
 
     @Override
@@ -49,7 +60,25 @@ public class UserProfileDAOImpl implements UserProfileDAO{
     }
 
     @Override
-    public UserProfile deleteUserProfileByUserId(int userId) {
-        return null;
+    public void deleteUserProfileByUserId(int userId) {
+        //get user
+        String query = Common.getDynamicQuery(User.class,"userId",userId);
+        User deletedUser = (entityManager.createQuery(query, User.class)).getSingleResult();
+
+        //get userProfile
+        TypedQuery<UserProfile> userProfileTypedQuery = (entityManager.createQuery("From UserProfile where createdBy = :deletedUser",UserProfile.class));
+        userProfileTypedQuery.setParameter("deletedUser",deletedUser);
+        UserProfile userProfile =  userProfileTypedQuery.getSingleResult();
+
+        //delete blogPost
+        Query blogPostDeleteQuery = entityManager.createQuery("Delete From BlogPost where postAuthorId = : deletedUserProfile");
+        blogPostDeleteQuery.setParameter("deletedUserProfile",userProfile);
+        blogPostDeleteQuery.executeUpdate();
+
+        //delete UserProfile
+        Query typedquery = entityManager.createQuery("Delete From UserProfile where createdBy = : deletedUser");
+        typedquery.setParameter("deletedUser",deletedUser);
+        typedquery.executeUpdate();
+        System.out.println("Done userProfile delete");
     }
 }

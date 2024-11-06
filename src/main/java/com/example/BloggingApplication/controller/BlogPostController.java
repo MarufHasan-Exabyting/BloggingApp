@@ -20,6 +20,7 @@ public class BlogPostController {
         this.blogService = blogService;
     }
 
+    //ok
     @PostMapping("/")
     public BlogPost createBlogPost(@Valid @RequestBody CreatePostDTO createPostDTO) {
         return blogService.createBlogPost(createPostDTO);
@@ -32,20 +33,20 @@ public class BlogPostController {
     }
 
     @GetMapping("/search")
-    public List<BlogPost> getAllPostsByParameters(@RequestParam(value = "authorName", required = false) String authorName,
-                                                  @RequestParam(value = "title", required = false) String title,
-                                                  @RequestParam(value = "category", required = false) String category) {
+    public List<BlogPost> getAllPostsByParameters(@Valid @RequestParam(value = "authorName", required = false) String authorName,
+                                                  @Valid @RequestParam(value = "title", required = false) String title,
+                                                  @Valid @RequestParam(value = "category", required = false) String category) {
         return blogService.getAllPosts(title, authorName, category);
     }
 
     @PutMapping("/")
-    public BlogPost updateBlogPost(@RequestBody UpdatePostDTO updatePostDTO)
+    public BlogPost updateBlogPost(@Valid @RequestBody UpdatePostDTO updatePostDTO)
     {
         return blogService.updatePost(updatePostDTO);
     }
 
     @DeleteMapping("/{postId}")
-    public void deleteBlogPost(@PathVariable int postId)
+    public void deleteBlogPost(@Valid @PathVariable int postId)
     {
         blogService.deletePostById(postId);
     }

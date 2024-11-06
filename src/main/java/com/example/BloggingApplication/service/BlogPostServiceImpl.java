@@ -9,8 +9,10 @@ import com.example.BloggingApplication.model.BlogPost;
 import com.example.BloggingApplication.model.EntityMetadata;
 import com.example.BloggingApplication.model.UserProfile;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Date;
 import java.util.List;
@@ -51,6 +53,7 @@ public class BlogPostServiceImpl implements BlogService{
         return blogDAO.updatePost(updatedBlogPost);
     }
 
+    @Transactional
     @Override
     public void deletePostById(int postId) {
         blogDAO.deletePostById(postId);
@@ -94,7 +97,7 @@ public class BlogPostServiceImpl implements BlogService{
         UserProfile userProfile = userProfileDAO.getUserProfileByUserId(userId);
         if(userProfile == null)
         {
-            throw new UserProfileCreateException(String.format("UserProfile with UserId %d not found",userId));
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,String.format("UserProfile with UserId %d not found",userId));
         }
         return userProfile;
     }

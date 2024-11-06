@@ -10,7 +10,7 @@ public class CreatePostDTO {
     private String postTitle;
 
     @NotEmpty(message = "BlogContent should not be empty")
-    @Size(min = 5, max = 5000,message = "The length of the title should be between 3 to 1000")
+    @Size(min = 5, max = 5000,message = "The length of the post should be between 3 to 5000")
     private String content;
 
     @Positive(message = "AuthorId must be positive integer")
