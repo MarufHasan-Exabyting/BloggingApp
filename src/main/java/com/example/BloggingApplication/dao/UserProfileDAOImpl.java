@@ -1,7 +1,9 @@
 package com.example.BloggingApplication.dao;
 
+import com.example.BloggingApplication.exception.BlogPostNotFoundException;
 import com.example.BloggingApplication.exception.UserNotFoundException;
 import com.example.BloggingApplication.exception.UserProfileNotFoundException;
+import com.example.BloggingApplication.model.BlogPost;
 import com.example.BloggingApplication.model.User;
 import com.example.BloggingApplication.model.UserProfile;
 import jakarta.persistence.EntityManager;
@@ -10,6 +12,7 @@ import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -38,7 +41,7 @@ public class UserProfileDAOImpl implements UserProfileDAO{
     @Override
     public UserProfile getUserProfileByUserId(int userId) {
         User user = entityManager.find(User.class,userId);
-        TypedQuery<UserProfile> typedQuery = entityManager.createQuery ("From UserProfile where createdBy = :user", UserProfile.class);
+        TypedQuery<UserProfile> typedQuery = entityManager.createQuery ("From UserProfile where createdBy = :user and metadata.isDeleted = false", UserProfile.class);
         typedQuery.setParameter("user",user);
         List<UserProfile> userProfiles = typedQuery.getResultList();
         if(userProfiles.isEmpty())
@@ -62,7 +65,7 @@ public class UserProfileDAOImpl implements UserProfileDAO{
         //First the related blogposts need
         //to be deleted as userprofile is used
         //as a foreign key in blogpost
-
+        System.out.println("UserProfileDaoImpl");
         //get user
         User deletedUser = getUserByUserId(userId);
 
@@ -82,6 +85,7 @@ public class UserProfileDAOImpl implements UserProfileDAO{
 
     private User getUserByUserId(int userId)
     {
+        //System.out.println("Get User BY User Id line 88");
         String query = Common.getDynamicQuery(User.class,"userId",userId);
         List<User> deletedUsers = (entityManager.createQuery(query, User.class)).getResultList();
         if(deletedUsers.isEmpty())
@@ -93,7 +97,8 @@ public class UserProfileDAOImpl implements UserProfileDAO{
 
     private UserProfile getUserProfileByUser(User deletedUser)
     {
-        TypedQuery<UserProfile> userProfileTypedQuery = (entityManager.createQuery("From UserProfile where createdBy = :deletedUser",UserProfile.class));
+        System.out.println("Here getUserPrfileByUser ");
+        TypedQuery<UserProfile> userProfileTypedQuery = (entityManager.createQuery("From UserProfile where createdBy = :deletedUser and metadata.isDeleted = false",UserProfile.class));
         userProfileTypedQuery.setParameter("deletedUser",deletedUser);
         List<UserProfile> userProfiles =  userProfileTypedQuery.getResultList();
         if(userProfiles == null)
@@ -105,15 +110,38 @@ public class UserProfileDAOImpl implements UserProfileDAO{
 
     private void deleteBlogPostByUserProfile(UserProfile userProfile)
     {
-        Query blogPostDeleteQuery = entityManager.createQuery("Delete From BlogPost where postAuthorId = : deletedUserProfile");
+        TypedQuery<BlogPost> blogPostDeleteQuery = entityManager.createQuery("From BlogPost where postAuthorId = : deletedUserProfile",BlogPost.class);
         blogPostDeleteQuery.setParameter("deletedUserProfile",userProfile);
-        blogPostDeleteQuery.executeUpdate();
+        List<BlogPost> blogPosts = blogPostDeleteQuery.getResultList();
+        if(blogPosts.isEmpty())
+        {
+            return;
+        }
+        else
+        {
+            for(BlogPost blogPost : blogPosts)
+            {
+                blogPost.getMetadata().setDeleted(true);
+                blogPost.getMetadata().setDeletedAt(new Date(System.currentTimeMillis()));
+            }
+        }
     }
 
     private void deleteUserProfileByUser(User user)
     {
-        Query typedquery = entityManager.createQuery("Delete From UserProfile where createdBy = : deletedUser");
+        TypedQuery<UserProfile> typedquery = entityManager.createQuery("From UserProfile where createdBy = : deletedUser", UserProfile.class);
         typedquery.setParameter("deletedUser",user);
-        typedquery.executeUpdate();
+        List<UserProfile> userProfiles = typedquery.getResultList();
+        if(userProfiles.isEmpty())
+        {
+            return;
+            //throw new UserProfileNotFoundException(String.format("UserProfile with User Id %d not found",user.getUserId()));
+        }
+        else
+        {
+            UserProfile userProfile = userProfiles.getFirst();
+            userProfile.getMetadata().setDeleted(true);
+            userProfile.getMetadata().setDeletedAt(new Date(System.currentTimeMillis()));
+        }
     }
 }

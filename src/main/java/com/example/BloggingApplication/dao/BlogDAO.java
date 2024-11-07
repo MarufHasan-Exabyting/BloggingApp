@@ -15,6 +15,8 @@ public interface BlogDAO {
 
     List<BlogPost> getPostByAuthor(String authorName);
 
+    BlogPost getPostById(int id);
+
     BlogPost updatePost(BlogPost blogPost);
 
     int deletePostById(int postId);

@@ -74,9 +74,14 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public ResponseUserDTO updateUser(UpdateUserDTO updateUserDTO) {
         User user = getUserFromUpdateUserDTO(updateUserDTO);
+        if (userDao.getUserById(user.getUserId()) == null)
+        {
+            throw new UserNotFoundException(String.format("User with User ID %d not found",user.getUserId()));
+        }
         User updatedUser = userDao.updateUser(user);
 
         EntityMetadata entityMetadata = Common.getEntityMetadata(updatedUser.getMetadata().getCreatedAt(),new Date(System.currentTimeMillis()));
+        entityMetadata.setDeleted(false);
         updatedUser.setMetadata(entityMetadata);
 
         UserProfile userProfile = userProfileDAO.getUserProfileByUserId(updatedUser.getUserId());
@@ -94,6 +99,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public int deleteUser(int id) {
+        System.out.println("Deleted here 6 52");
         userProfileDAO.deleteUserProfileByUserId(id);
         return userDao.deleteUser(id);
     }
@@ -101,13 +107,20 @@ public class UserServiceImpl implements UserService {
     //Helper functions
     public User createUserFromDTO(CreateUserDTO createUserDTO)
     {
+        if(isUserExist(createUserDTO.getUserEmail()))
+        {
+            throw new UserCreateException(String.format("User with mail %s already exists",createUserDTO.getUserEmail()));
+        }
+
         User user = new User();
         user.setFirstName(createUserDTO.getFirstName());
         user.setLastName(createUserDTO.getLastName());
         user.setPassword(createUserDTO.getPassword());
         user.setUserEmail(createUserDTO.getUserEmail());
 
+
         EntityMetadata metadata = Common.getEntityMetadata(new Date(System.currentTimeMillis()), new Date(System.currentTimeMillis()));
+        metadata.setDeleted(false);
         user.setMetadata(metadata);
 
         User createdUser = userDao.createUser(user);
@@ -116,6 +129,16 @@ public class UserServiceImpl implements UserService {
             throw new UserCreateException("User Not created Exception");
         }
         return createdUser;
+    }
+
+    private boolean isUserExist(String userEmail)
+    {
+        User user = userDao.getUserByEmail(userEmail);
+        if(user == null)
+        {
+            return true;
+        }
+        return false;
     }
 
 

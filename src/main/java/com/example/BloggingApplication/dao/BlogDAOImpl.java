@@ -1,5 +1,6 @@
 package com.example.BloggingApplication.dao;
 
+import com.example.BloggingApplication.exception.BlogPostNotFoundException;
 import com.example.BloggingApplication.model.BlogPost;
 import com.example.BloggingApplication.model.EntityMetadata;
 import com.example.BloggingApplication.model.UserProfile;
@@ -32,7 +33,7 @@ public class BlogDAOImpl implements BlogDAO{
 
     @Override
     public List<BlogPost> getAllPosts() {
-        TypedQuery<BlogPost> query = entityManager.createQuery("From BlogPost",BlogPost.class);
+        TypedQuery<BlogPost> query = entityManager.createQuery("From BlogPost where metadata.isDeleted = false",BlogPost.class);
         return query.getResultList();
     }
 
@@ -59,6 +60,18 @@ public class BlogDAOImpl implements BlogDAO{
     }
 
     @Override
+    public BlogPost getPostById(int id) {
+        String query = Common.getDynamicQuery(BlogPost.class, "postId",id);
+        TypedQuery<BlogPost> blogPostTypedQuery = entityManager.createQuery(query,BlogPost.class);
+        List<BlogPost> blogPosts = blogPostTypedQuery.getResultList();
+        if(blogPosts.isEmpty())
+        {
+            throw new BlogPostNotFoundException(String.format("Blogpost with post Id %d not found",id));
+        }
+        return blogPosts.getFirst();
+    }
+
+    @Override
     public BlogPost updatePost(BlogPost blogPost) {
         BlogPost previousBlog = getBlogPostByPostId(blogPost.getPostId());
         EntityMetadata metadata = Common.getEntityMetadata(previousBlog.getMetadata().getCreatedAt(), new Date(System.currentTimeMillis()));
@@ -69,10 +82,19 @@ public class BlogDAOImpl implements BlogDAO{
 
     @Override
     public int deletePostById(int postId) {
-        String query = Common.getDynamicQuery(BlogPost.class,"postId",postId);
-        System.out.println(query);
-        query = "Delete " + query;
-        return entityManager.createQuery(query).executeUpdate();
+        //String query = Common.getDynamicQuery(BlogPost.class,"postId",postId);
+        //System.out.println(query);
+        //query = "Delete " + query;
+        BlogPost blogPost = entityManager.find(BlogPost.class,postId);
+        if(blogPost == null ||(blogPost.getMetadata().getDeleted()))
+        {
+            throw new BlogPostNotFoundException(String.format("Blogpost with postId %d already deleted",postId));
+        }
+        //System.out.println(blogPost);
+        blogPost.getMetadata().setDeleted(true);
+        blogPost.getMetadata().setDeletedAt(new Date(System.currentTimeMillis()));
+        //return entityManager.createQuery(query).executeUpdate();
+        return 1;
     }
 
     //****
@@ -81,8 +103,8 @@ public class BlogDAOImpl implements BlogDAO{
     private UserProfile getUserProfileByUserName(String userName)
     {
         //String query = Common.getDynamicQuery(UserProfile.class,"userName",userName);
-        String query = "From UserProfile where userName like :name" ;
-        System.out.println("GetUserProfileByUserName : "+query);
+        String query = "From UserProfile where userName like :name and metadata.isDeleted = false" ;
+        //System.out.println("GetUserProfileByUserName : "+query);
         TypedQuery<UserProfile> userProfileTypedQuery = entityManager.createQuery(query, UserProfile.class);
         userProfileTypedQuery.setParameter("name",userName);
         List<UserProfile> userProfiles = userProfileTypedQuery.getResultList();
@@ -99,6 +121,7 @@ public class BlogDAOImpl implements BlogDAO{
     private BlogPost getBlogPostByPostId(int postId)
     {
         String query = Common.getDynamicQuery(BlogPost.class,"postId",postId);
+        //query = query + " And isDeleted = false";
         TypedQuery<BlogPost> blogPostTypedQuery = entityManager.createQuery(query, BlogPost.class);
         List<BlogPost> blogPosts = blogPostTypedQuery.getResultList();
         if(blogPosts.isEmpty())
@@ -142,6 +165,8 @@ public class BlogDAOImpl implements BlogDAO{
             jpql.append(" AND ");
             jpql.append(conditions.get(i));
         }
+
+        String jpqlQuery = jpql.toString() + " and metadata.isDeleted = false";
 
         TypedQuery<BlogPost> query = entityManager.createQuery(jpql.toString(),BlogPost.class);
 

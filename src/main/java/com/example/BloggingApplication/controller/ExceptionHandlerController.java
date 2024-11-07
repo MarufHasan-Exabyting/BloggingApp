@@ -1,9 +1,7 @@
 package com.example.BloggingApplication.controller;
 
 import com.example.BloggingApplication.dto.ApiResponse;
-import com.example.BloggingApplication.exception.ResourceNotFoundException;
-import com.example.BloggingApplication.exception.UserNotFoundException;
-import com.example.BloggingApplication.exception.UserProfileNotFoundException;
+import com.example.BloggingApplication.exception.*;
 import com.example.BloggingApplication.util.ResponseUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -35,6 +33,18 @@ public class ExceptionHandlerController {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ApiResponse<Object> handleValidationException(MethodArgumentNotValidException methodArgumentNotValidException, HttpServletRequest request)
     {
-        return ResponseUtil.error(Arrays.asList(methodArgumentNotValidException.getMessage()),"Validation Error",404, request.getRequestURI());
+        return ResponseUtil.error(Arrays.asList(methodArgumentNotValidException.getMessage()),"Validation Error",422, request.getRequestURI());
+    }
+
+    @ExceptionHandler(BlogPostNotFoundException.class)
+    public ApiResponse<Object> handleBlogPostNotFoundException(BlogPostNotFoundException blogPostNotFoundException, HttpServletRequest request)
+    {
+        return ResponseUtil.error(Arrays.asList(blogPostNotFoundException.getMessage()),"Blog post not found exception",422, request.getRequestURI());
+    }
+
+    @ExceptionHandler(UserCreateException.class)
+    public ApiResponse<Object> handleUserCreateException(UserCreateException userCreateException, HttpServletRequest request)
+    {
+        return ResponseUtil.error(Arrays.asList(userCreateException.getMessage()),"User Creation failed",422, request.getRequestURI());
     }
 }

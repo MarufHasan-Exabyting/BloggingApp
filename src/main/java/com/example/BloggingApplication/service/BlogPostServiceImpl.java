@@ -3,6 +3,7 @@ package com.example.BloggingApplication.service;
 import com.example.BloggingApplication.dao.BlogDAO;
 import com.example.BloggingApplication.dao.UserProfileDAO;
 import com.example.BloggingApplication.dto.CreatePostDTO;
+import com.example.BloggingApplication.dto.ResponseBlogPostDTO;
 import com.example.BloggingApplication.dto.UpdatePostDTO;
 import com.example.BloggingApplication.model.BlogPost;
 import com.example.BloggingApplication.model.EntityMetadata;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -29,27 +31,35 @@ public class BlogPostServiceImpl implements BlogService{
 
     @Override
     @Transactional
-    public BlogPost createBlogPost(CreatePostDTO createPostDTO) {
+    public ResponseBlogPostDTO createBlogPost(CreatePostDTO createPostDTO) {
         UserProfile userProfile = getUserProfileByUserId(createPostDTO.getPostAuthorId());
         BlogPost blogPost = toBlogPost(createPostDTO,userProfile);
-        return blogDAO.createPost(blogPost);
+        BlogPost createdPost = blogDAO.createPost(blogPost);
+        return getResponsePost(createdPost);
     }
 
     @Override
-    public List<BlogPost> getAllPosts() {
-        return blogDAO.getAllPosts();
+    public ResponseBlogPostDTO getpostById(int id) {
+        BlogPost blogPost = blogDAO.getPostById(id);
+        return getResponsePost(blogPost);
     }
 
     @Override
-    public List<BlogPost> getAllPosts(String title, String authorName, String category) {
-        return blogDAO.getAllPosts(title,authorName,category);
+    public List<ResponseBlogPostDTO> getAllPosts() {
+        return getResponsePosts(blogDAO.getAllPosts());
+    }
+
+    @Override
+    public List<ResponseBlogPostDTO> getAllPosts(String title, String authorName, String category) {
+        return getResponsePosts(blogDAO.getAllPosts(title,authorName,category));
     }
 
     @Override
     @Transactional
-    public BlogPost updatePost(UpdatePostDTO updatePostDTO) {
-        BlogPost updatedBlogPost = toBlogPost(updatePostDTO);
-        return blogDAO.updatePost(updatedBlogPost);
+    public ResponseBlogPostDTO updatePost(UpdatePostDTO updatePostDTO) {
+        BlogPost blogPost = toBlogPost(updatePostDTO);
+        BlogPost updatedBlogPost = blogDAO.updatePost(blogPost);
+        return getResponsePost(updatedBlogPost);
     }
 
     @Transactional
@@ -71,6 +81,7 @@ public class BlogPostServiceImpl implements BlogService{
         EntityMetadata entityMetadata = new EntityMetadata();
         entityMetadata.setCreatedAt(new Date(System.currentTimeMillis()));;
         entityMetadata.setUpdatedAt(new Date(System.currentTimeMillis()));
+        entityMetadata.setDeleted(false);
         blogPost.setMetadata(entityMetadata);
         return blogPost;
     }
@@ -80,7 +91,8 @@ public class BlogPostServiceImpl implements BlogService{
     private BlogPost toBlogPost(UpdatePostDTO updatePostDTO)
     {
         int postAuthorId = updatePostDTO.getPostAuthorId();
-        BlogPost blogPost = new BlogPost();
+
+        BlogPost blogPost = blogDAO.getPostById(updatePostDTO.getPostId());
 
         blogPost.setPostId(updatePostDTO.getPostId());
         blogPost.setPostTitle(updatePostDTO.getPostTitle());
@@ -99,5 +111,27 @@ public class BlogPostServiceImpl implements BlogService{
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,String.format("UserProfile with UserId %d not found",userId));
         }
         return userProfile;
+    }
+
+    private List<ResponseBlogPostDTO> getResponsePosts(List<BlogPost> blogPosts)
+    {
+        List<ResponseBlogPostDTO> responsePosts = new ArrayList<>();
+        for(BlogPost blogPost : blogPosts)
+        {
+            responsePosts.add(getResponsePost(blogPost));
+        }
+        return responsePosts;
+    }
+
+    private ResponseBlogPostDTO getResponsePost(BlogPost blogPost)
+    {
+        ResponseBlogPostDTO response = new ResponseBlogPostDTO();
+        response.setPostId(blogPost.getPostId());
+        response.setCategory(blogPost.getCategory());
+        response.setContent(blogPost.getContent());
+        response.setPostTitle(blogPost.getPostTitle());
+        response.setPostAuthorName(blogPost.getPostAuthorId().getUserName());
+        response.setCreatedAt(blogPost.getMetadata().getCreatedAt());
+        return response;
     }
 }
