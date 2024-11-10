@@ -99,7 +99,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public int deleteUser(int id) {
-        System.out.println("Deleted here 6 52");
         userProfileDAO.deleteUserProfileByUserId(id);
         return userDao.deleteUser(id);
     }
@@ -136,9 +135,9 @@ public class UserServiceImpl implements UserService {
         User user = userDao.getUserByEmail(userEmail);
         if(user == null)
         {
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 
 

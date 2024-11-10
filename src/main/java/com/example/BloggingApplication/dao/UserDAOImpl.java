@@ -70,11 +70,12 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public User getUserByEmail(String userEmail) {
-        //String query = Common.getDynamicQuery(User.class,"userEmail",userEmail);
         TypedQuery<User> typedQuery = entityManager.createQuery("From User where userEmail like : email and metadata.isDeleted = false",User.class);
         typedQuery.setParameter("email",userEmail);
         List<User> userList = typedQuery.getResultList();
-        if(userList.isEmpty())
+        System.out.println("Hello UserList");
+        System.out.println(userList);
+        if(!userList.isEmpty())
         {
             return userList.getFirst();
         }
