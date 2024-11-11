@@ -33,18 +33,24 @@ public class ExceptionHandlerController {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ApiResponse<Object> handleValidationException(MethodArgumentNotValidException methodArgumentNotValidException, HttpServletRequest request)
     {
-        return ResponseUtil.error(Arrays.asList(methodArgumentNotValidException.getMessage()),"Validation Error",422, request.getRequestURI());
+        return ResponseUtil.error(Arrays.asList(methodArgumentNotValidException.getMessage()),"Validation Error",400, request.getRequestURI());
     }
 
     @ExceptionHandler(BlogPostNotFoundException.class)
     public ApiResponse<Object> handleBlogPostNotFoundException(BlogPostNotFoundException blogPostNotFoundException, HttpServletRequest request)
     {
-        return ResponseUtil.error(Arrays.asList(blogPostNotFoundException.getMessage()),"Blog post not found exception",422, request.getRequestURI());
+        return ResponseUtil.error(Arrays.asList(blogPostNotFoundException.getMessage()),"Blog post not found exception",400, request.getRequestURI());
     }
 
     @ExceptionHandler(UserCreateException.class)
     public ApiResponse<Object> handleUserCreateException(UserCreateException userCreateException, HttpServletRequest request)
     {
-        return ResponseUtil.error(Arrays.asList(userCreateException.getMessage()),"User Creation failed",422, request.getRequestURI());
+        return ResponseUtil.error(Arrays.asList(userCreateException.getMessage()),"User Creation failed",400, request.getRequestURI());
+    }
+
+    @ExceptionHandler(CommentNotFoundException.class)
+    public ApiResponse<Object> handleCommentNotFoundException(CommentNotFoundException commentNotFoundException, HttpServletRequest request)
+    {
+        return ResponseUtil.error(Arrays.asList(commentNotFoundException.getMessage()),"Comment Not found",400, request.getRequestURI());
     }
 }

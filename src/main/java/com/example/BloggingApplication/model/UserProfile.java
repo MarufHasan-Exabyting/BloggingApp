@@ -3,6 +3,7 @@ package com.example.BloggingApplication.model;
 
 import jakarta.persistence.*;
 
+import java.util.LinkedList;
 import java.util.List;
 
 @Entity
@@ -29,16 +30,20 @@ public class UserProfile {
     @OneToMany(mappedBy = "postAuthorId", fetch = FetchType.LAZY)
     List<BlogPost> blogPosts;
 
+    @OneToMany(mappedBy = "commentator")
+    List<Comment> comments = new LinkedList<>();
+
     public UserProfile() {
     }
 
-    public UserProfile(int userProfileId, String userName, EntityMetadata metadata, String userEmail, User createdBy, List<BlogPost> blogPosts) {
+    public UserProfile(int userProfileId, String userName, EntityMetadata metadata, String userEmail, User createdBy, List<BlogPost> blogPosts, List<Comment> comments) {
         this.userProfileId = userProfileId;
         this.userName = userName;
         this.metadata = metadata;
         this.userEmail = userEmail;
         this.createdBy = createdBy;
         this.blogPosts = blogPosts;
+        this.comments = comments;
     }
 
     public User getCreatedBy() {
@@ -87,5 +92,13 @@ public class UserProfile {
 
     public void setMetadata(EntityMetadata metadata) {
         this.metadata = metadata;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
     }
 }

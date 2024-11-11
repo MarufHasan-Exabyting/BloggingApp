@@ -46,7 +46,7 @@ public class UserProfileDAOImpl implements UserProfileDAO{
         List<UserProfile> userProfiles = typedQuery.getResultList();
         if(userProfiles.isEmpty())
         {
-            return null;
+            throw new UserProfileNotFoundException(String.format("UserProfile with User Id : %d not found",userId));
         }
         else
         {
@@ -65,7 +65,7 @@ public class UserProfileDAOImpl implements UserProfileDAO{
         //First the related blogposts need
         //to be deleted as userprofile is used
         //as a foreign key in blogpost
-        System.out.println("UserProfileDaoImpl");
+
         //get user
         User deletedUser = getUserByUserId(userId);
 

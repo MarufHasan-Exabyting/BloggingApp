@@ -4,6 +4,9 @@ package com.example.BloggingApplication.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
+import java.util.LinkedList;
+import java.util.List;
+
 
 @Entity
 @Table(name = "blogpost")
@@ -27,18 +30,26 @@ public class BlogPost {
     @Column(name = "category")
     private String category;
 
+    @OneToMany(mappedBy = "blogPost")
+    @JsonIgnore
+    List<Comment> comments = new LinkedList<>();
+
     @Embedded
     private EntityMetadata metadata;
 
     public BlogPost() {
     }
 
-    public BlogPost(int postId, String postTitle, UserProfile postAuthorId, String content, String category) {
+    public BlogPost(int postId, String postTitle, UserProfile postAuthorId, String content,
+                    String category, LinkedList<Comment> comments, EntityMetadata metadata)
+    {
         this.postId = postId;
         this.postTitle = postTitle;
         this.postAuthorId = postAuthorId;
         this.content = content;
         this.category = category;
+        this.comments = comments;
+        this.metadata = metadata;
     }
 
     public UserProfile getPostAuthorId() {
@@ -87,6 +98,19 @@ public class BlogPost {
 
     public void setMetadata(EntityMetadata metadata) {
         this.metadata = metadata;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(LinkedList<Comment> comments) {
+        this.comments = comments;
+    }
+
+    public void addComments(Comment comment)
+    {
+        this.comments.add(comment);
     }
 
     @Override
