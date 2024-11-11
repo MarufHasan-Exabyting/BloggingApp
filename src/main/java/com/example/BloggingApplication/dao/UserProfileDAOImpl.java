@@ -1,13 +1,11 @@
 package com.example.BloggingApplication.dao;
 
-import com.example.BloggingApplication.exception.BlogPostNotFoundException;
 import com.example.BloggingApplication.exception.UserNotFoundException;
 import com.example.BloggingApplication.exception.UserProfileNotFoundException;
 import com.example.BloggingApplication.model.BlogPost;
 import com.example.BloggingApplication.model.User;
 import com.example.BloggingApplication.model.UserProfile;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;

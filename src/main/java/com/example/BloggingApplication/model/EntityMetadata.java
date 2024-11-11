@@ -1,6 +1,5 @@
 package com.example.BloggingApplication.model;
 
-import jakarta.persistence.Column;
 
 import java.util.Date;
 

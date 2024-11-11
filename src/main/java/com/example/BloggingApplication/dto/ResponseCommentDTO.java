@@ -1,10 +1,6 @@
 package com.example.BloggingApplication.dto;
 
-import com.example.BloggingApplication.model.BlogPost;
-import com.example.BloggingApplication.model.EntityMetadata;
-import com.example.BloggingApplication.model.UserProfile;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+
 
 import java.util.Date;
 

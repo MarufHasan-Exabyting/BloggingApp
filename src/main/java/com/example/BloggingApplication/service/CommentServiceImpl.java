@@ -3,6 +3,7 @@ package com.example.BloggingApplication.service;
 import com.example.BloggingApplication.dao.*;
 import com.example.BloggingApplication.dto.CreateComment;
 import com.example.BloggingApplication.dto.ResponseCommentDTO;
+import com.example.BloggingApplication.dto.UpdateCommentDTO;
 import com.example.BloggingApplication.model.BlogPost;
 import com.example.BloggingApplication.model.Comment;
 import com.example.BloggingApplication.model.EntityMetadata;
@@ -38,6 +39,28 @@ public class CommentServiceImpl implements CommentService{
     @Override
     public List<ResponseCommentDTO> getCommentsByPostId(int postId) {
         return responseCommentDTOList(commentDAO.getCommentsByPostId(postId));
+    }
+
+    @Override
+    public Comment getCommentById(int commentId) {
+         return commentDAO.getCommentByCommentId(commentId);
+    }
+
+    @Override
+    @Transactional
+    public ResponseCommentDTO updateComment(UpdateCommentDTO updateCommentDTO) {
+        int commentId = updateCommentDTO.getCommentId();
+        Comment comment = getCommentById(commentId);
+        comment.setContent(updateCommentDTO.getUpdatedComment());
+        comment.getMetadata().setUpdatedAt(new Date(System.currentTimeMillis()));
+
+        return toResponseCommentDTO(commentDAO.updateComment(comment));
+    }
+
+    @Override
+    @Transactional
+    public int deleteCommentByCommentId(int commentId) {
+        return commentDAO.deleteCommentByCommentId(commentId);
     }
 
 

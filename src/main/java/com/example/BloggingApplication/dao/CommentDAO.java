@@ -7,4 +7,10 @@ import java.util.List;
 public interface CommentDAO {
     Comment addComment(Comment comment);
     List<Comment> getCommentsByPostId(int postId);
+
+    Comment getCommentByCommentId(int commentId);
+
+    Comment updateComment(Comment updatedComment);
+
+    int deleteCommentByCommentId(int commentId);
 }

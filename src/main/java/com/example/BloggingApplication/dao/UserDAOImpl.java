@@ -1,7 +1,6 @@
 package com.example.BloggingApplication.dao;
 
 import com.example.BloggingApplication.exception.UserNotFoundException;
-import com.example.BloggingApplication.model.EntityMetadata;
 import com.example.BloggingApplication.model.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
