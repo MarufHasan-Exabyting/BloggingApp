@@ -4,14 +4,23 @@ import com.example.BloggingApplication.dao.Common;
 import com.example.BloggingApplication.dao.UserDAO;
 import com.example.BloggingApplication.dao.UserProfileDAO;
 import com.example.BloggingApplication.dto.CreateUserDTO;
+import com.example.BloggingApplication.dto.LogInDTO;
 import com.example.BloggingApplication.dto.ResponseUserDTO;
 import com.example.BloggingApplication.dto.UpdateUserDTO;
 import com.example.BloggingApplication.exception.UserCreateException;
 import com.example.BloggingApplication.exception.UserNotFoundException;
 import com.example.BloggingApplication.model.EntityMetadata;
 import com.example.BloggingApplication.model.User;
+import com.example.BloggingApplication.model.UserPrincipal;
 import com.example.BloggingApplication.model.UserProfile;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,22 +33,32 @@ public class UserServiceImpl implements UserService {
 
     private UserDAO userDao;
     private UserProfileDAO userProfileDAO;
+    private AuthenticationManager authenticationManager;
+
+    private JWTService jwtService;
+
+    private BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(12);
+
 
     @Autowired
-    public UserServiceImpl(UserDAO userDao, UserProfileDAO userProfileDAO) {
+    public UserServiceImpl(UserDAO userDao, UserProfileDAO userProfileDAO, AuthenticationManager authenticationManager, JWTService jwtService) {
         this.userDao = userDao;
         this.userProfileDAO = userProfileDAO;
+        this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
     }
 
     @Override
     @Transactional
-    public ResponseUserDTO createUser(CreateUserDTO createUserDTO) {
-
+    public ResponseUserDTO RegisterUser(CreateUserDTO createUserDTO) {
+        //System.out.println(createUserDTO);
         User createdUser = createUserFromDTO(createUserDTO);
+
         if(createdUser == null)
         {
             throw new UserCreateException("User not created Exception");
         }
+
         UserProfile userProfile = createUserProfile(createdUser);
         userProfileDAO.createUserProfile(userProfile);
         return getUserResponseDTO(createdUser);
@@ -103,19 +122,36 @@ public class UserServiceImpl implements UserService {
         return userDao.deleteUser(id);
     }
 
+    @Override
+    public String verifyLogin(LogInDTO logInDTO) {
+        Authentication authentication = authenticationManager.
+                authenticate(new UsernamePasswordAuthenticationToken(logInDTO.getUserName(),logInDTO.getPassword()));
+        if(authentication.isAuthenticated())
+        {
+            return jwtService.generateToken(logInDTO.getUserName());
+        }
+        return "fail";
+    }
+
     //Helper functions
     public User createUserFromDTO(CreateUserDTO createUserDTO)
     {
+        System.out.println("Line 132");
         if(isUserExist(createUserDTO.getUserEmail()))
         {
             throw new UserCreateException(String.format("User with mail %s already exists",createUserDTO.getUserEmail()));
+        }
+        else if(!isUserNameAvailable(createUserDTO.getUserName()))
+        {
+            throw new UserCreateException(String.format("UserName %d not available",createUserDTO.getUserName()));
         }
 
         User user = new User();
         user.setFirstName(createUserDTO.getFirstName());
         user.setLastName(createUserDTO.getLastName());
-        user.setPassword(createUserDTO.getPassword());
+        user.setPassword(bCryptPasswordEncoder.encode(createUserDTO.getPassword()));
         user.setUserEmail(createUserDTO.getUserEmail());
+        user.setUserName(createUserDTO.getUserName());
 
 
         EntityMetadata metadata = Common.getEntityMetadata(new Date(System.currentTimeMillis()), new Date(System.currentTimeMillis()));
@@ -127,24 +163,26 @@ public class UserServiceImpl implements UserService {
         {
             throw new UserCreateException("User Not created Exception");
         }
+        //System.out.println(createdUser);
         return createdUser;
     }
 
     private boolean isUserExist(String userEmail)
     {
         User user = userDao.getUserByEmail(userEmail);
-        if(user == null)
-        {
-            return false;
-        }
-        return true;
+        return (!(user==null));
+    }
+
+    private boolean isUserNameAvailable(String userName)
+    {
+        User user = userDao.getUserByUserName(userName);
+        return (user == null);
     }
 
 
     private UserProfile createUserProfile(User createdUser) {
         UserProfile userProfile = new UserProfile();
-        String userName = createdUser.getFirstName() + " " + createdUser.getLastName();
-        userProfile.setUserName(userName);
+        userProfile.setUserName(createdUser.getUserName());
         userProfile.setUserEmail(createdUser.getUserEmail());
         userProfile.setMetadata(createdUser.getMetadata());
         userProfile.setCreatedBy(createdUser);

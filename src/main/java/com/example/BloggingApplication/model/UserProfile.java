@@ -14,7 +14,7 @@ public class UserProfile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int userProfileId;
     
-    @Column(name = "name")
+    @Column(name = "user_name")
     private String userName;
 
     @Embedded

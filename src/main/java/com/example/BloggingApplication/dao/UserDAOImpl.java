@@ -22,6 +22,7 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public User createUser(User user) {
+        //System.out.println(user);
         entityManager.persist(user);
         return user;
     }
@@ -77,5 +78,17 @@ public class UserDAOImpl implements UserDAO {
             return userList.getFirst();
         }
         return null;
+    }
+
+    @Override
+    public User getUserByUserName(String userName) {
+        TypedQuery<User> typedQuery = entityManager.createQuery("From User where userName like : name and metadata.isDeleted = false",User.class);
+        typedQuery.setParameter("name", userName);
+        List<User> userList = typedQuery.getResultList();
+        if(userList.isEmpty())
+        {
+            return null;
+        }
+        return userList.getFirst();
     }
 }

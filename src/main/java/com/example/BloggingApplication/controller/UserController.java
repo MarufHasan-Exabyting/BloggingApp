@@ -1,9 +1,6 @@
 package com.example.BloggingApplication.controller;
 
-import com.example.BloggingApplication.dto.ApiResponse;
-import com.example.BloggingApplication.dto.CreateUserDTO;
-import com.example.BloggingApplication.dto.ResponseUserDTO;
-import com.example.BloggingApplication.dto.UpdateUserDTO;
+import com.example.BloggingApplication.dto.*;
 import com.example.BloggingApplication.service.UserService;
 import com.example.BloggingApplication.util.ResponseUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,12 +21,21 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/")
+    @PostMapping("/register")
     public ResponseEntity<ApiResponse<ResponseUserDTO> >  createUser(@Valid @RequestBody CreateUserDTO user, HttpServletRequest request)
     {
-        ResponseUserDTO responseUserDTO = userService.createUser(user);
+        ResponseUserDTO responseUserDTO = userService.RegisterUser(user);
         return ResponseEntity.ok(ResponseUtil.success(responseUserDTO,"User created successfully", request.getRequestURI()));
     }
+
+    @PostMapping("/login")
+    public String logInUser(@Valid @RequestBody LogInDTO logInDTO)
+    {
+        System.out.println(logInDTO);
+        return userService.verifyLogin(logInDTO);
+    }
+
+
 
     @GetMapping("/")
     public ResponseEntity<ApiResponse<List<ResponseUserDTO>> > getAllUsers(HttpServletRequest request)

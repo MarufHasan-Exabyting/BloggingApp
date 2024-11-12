@@ -14,6 +14,10 @@ public class CreateUserDTO {
     @NotEmpty(message = "Last Name is required")
     private String lastName;
 
+
+    @NotEmpty(message = "UserName is required")
+    private String userName;
+
     @NotEmpty(message = "password is required")
     @Size(min = 6,max = 20,message = "Length of password should be between 6-20")
     private String password;
@@ -24,9 +28,10 @@ public class CreateUserDTO {
     public CreateUserDTO() {
     }
 
-    public CreateUserDTO(String firstName, String lastName, String password, String userEmail) {
+    public CreateUserDTO(String firstName, String lastName, String userName, String password, String userEmail) {
         this.firstName = firstName;
         this.lastName = lastName;
+        this.userName = userName;
         this.password = password;
         this.userEmail = userEmail;
     }
@@ -63,11 +68,20 @@ public class CreateUserDTO {
         this.userEmail = userEmail;
     }
 
+    public @NotEmpty(message = "UserName is required") String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(@NotEmpty(message = "UserName is required") String userName) {
+        this.userName = userName;
+    }
+
     @Override
     public String toString() {
         return "CreateUserDTO{" +
                 "firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
+                ", userName='" + userName + '\'' +
                 ", password='" + password + '\'' +
                 ", userEmail='" + userEmail + '\'' +
                 '}';

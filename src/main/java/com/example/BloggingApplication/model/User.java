@@ -17,6 +17,9 @@ public class User {
     @Column(name = "last_name")
     private String lastName;
 
+    @Column(name = "user_name")
+    private String userName;
+
     @Column(name = "password")
     private String password;
 
@@ -29,13 +32,17 @@ public class User {
     public User() {
     }
 
-    public User(int userId, String firstName, String lastName, String password,
-                String userEmail) {
+    public User(int userId, String firstName, String lastName,
+                String userName, String password, String userEmail,
+                EntityMetadata metadata)
+    {
         this.userId = userId;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.userName = userName;
         this.password = password;
         this.userEmail = userEmail;
+        this.metadata = metadata;
     }
 
     public String getFirstName() {
@@ -86,12 +93,21 @@ public class User {
         this.metadata = metadata;
     }
 
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
     @Override
     public String toString() {
         return "User{" +
                 "userId=" + userId +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
+                ", userName='" + userName + '\'' +
                 ", password='" + password + '\'' +
                 ", userEmail='" + userEmail + '\'' +
                 ", metadata=" + metadata +
