@@ -65,4 +65,10 @@ public class ExceptionHandlerController {
     {
         return ResponseUtil.error(Arrays.asList(signatureException.getMessage()),"Signature not verified",400, request.getRequestURI());
     }
+
+    @ExceptionHandler(AuthorizationException.class)
+    public ApiResponse<Object> handleAuthorizatioinException(AuthorizationException authorizationException, HttpServletRequest request)
+    {
+        return ResponseUtil.error(Arrays.asList(authorizationException.getMessage()),"do not have authorization",400, request.getRequestURI());
+    }
 }

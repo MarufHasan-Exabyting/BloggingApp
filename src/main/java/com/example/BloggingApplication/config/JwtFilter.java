@@ -4,6 +4,7 @@ import com.example.BloggingApplication.exception.JWTAuthenticationException;
 import com.example.BloggingApplication.model.Role;
 import com.example.BloggingApplication.service.BlogUserDetailsService;
 import com.example.BloggingApplication.service.JWTService;
+import com.example.BloggingApplication.util.Utility;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,7 +51,9 @@ public class JwtFilter extends OncePerRequestFilter {
             UserDetails userDetails = applicationContext.getBean(BlogUserDetailsService.class).loadUserByUsername(userName);
             role = jwtService.extractRole(token);
 
-            boolean isAuthorize = checkRoleAuthroization(role,request.getRequestURI());
+            boolean isAuthorize = Utility.checkRoleAuthroization(role,request.getRequestURI());
+
+            boolean hasModificationAuthority = checkModificationAuthority(token,request);
 
             if(jwtService.validateToken(token, userDetails) && isAuthorize)
             {
@@ -64,14 +67,17 @@ public class JwtFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    private boolean checkModificationAuthority(String token, HttpServletRequest request) {
+        //check if the request is update or delete
+        System.out.println(request.getMethod());
 
-    boolean checkRoleAuthroization(Role role, String url)
-    {
-        System.out.println(role.toString() + " " + url);
-        if(url.contains("admin") && role != Role.ROLE_ADMIN)
-        {
-            return false;
-        }
+        //check who is the owner of the resource
+        //only Owner can modify the user,blogpost and comment
+        //Owner and Admin can delete the user and blogpost
+        // Blogpost owner, commentator and Admin can delete the comment
+        String userName = jwtService.extractUserName(token);
         return true;
     }
+
+
 }

@@ -1,6 +1,9 @@
 package com.example.BloggingApplication.controller;
 
 import com.example.BloggingApplication.dto.*;
+import com.example.BloggingApplication.exception.AuthorizationException;
+import com.example.BloggingApplication.exception.ResourceNotFoundException;
+import com.example.BloggingApplication.service.AuthorizationService;
 import com.example.BloggingApplication.service.UserService;
 import com.example.BloggingApplication.util.ResponseUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,10 +18,12 @@ import java.util.List;
 @RequestMapping("api/v1/")
 public class UserController {
     private UserService userService;
+    private AuthorizationService authorizationService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, AuthorizationService authorizationService) {
         this.userService = userService;
+        this.authorizationService = authorizationService;
     }
 
     @PostMapping("/users/register")
@@ -60,6 +65,12 @@ public class UserController {
     @DeleteMapping("/users/{id}")
     public ResponseEntity<ApiResponse<Integer>> deleteUser(@Valid @PathVariable int id, HttpServletRequest request)
     {
+        boolean canDelete = authorizationService.checkIfAuthorizeToDeleteUser(id,request);
+        if(!canDelete)
+        {
+            throw new AuthorizationException("Does not have permission to delete the Id : " + id);
+        }
+
         int deletedCount = userService.deleteUser(id);
         return ResponseEntity.ok(ResponseUtil.success(deletedCount,String.format("The user with User Id : %d deleted successfully",id),request.getRequestURI()));
     }

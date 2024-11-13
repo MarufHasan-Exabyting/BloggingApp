@@ -7,6 +7,7 @@ public class ResponseUserDTO {
     private String firstName;
     private String lastName;
     private String userEmail;
+    private String user_name;
     private Date created_at;
     private Date updated_at;
 
@@ -16,15 +17,6 @@ public class ResponseUserDTO {
 
     public void setUserId(int userId) {
         this.userId = userId;
-    }
-
-    public ResponseUserDTO(int userId, String firstName, String lastName, String userEmail, Date created_at, Date updated_at) {
-        this.userId = userId;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.userEmail = userEmail;
-        this.created_at = created_at;
-        this.updated_at = updated_at;
     }
 
     public ResponseUserDTO() {
@@ -70,12 +62,22 @@ public class ResponseUserDTO {
         this.userEmail = userEmail;
     }
 
+    public String getUser_name() {
+        return user_name;
+    }
+
+    public void setUser_name(String user_name) {
+        this.user_name = user_name;
+    }
+
     @Override
     public String toString() {
         return "ResponseUserDTO{" +
-                "firstName='" + firstName + '\'' +
+                "userId=" + userId +
+                ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", userEmail='" + userEmail + '\'' +
+                ", user_name='" + user_name + '\'' +
                 ", created_at=" + created_at +
                 ", updated_at=" + updated_at +
                 '}';
