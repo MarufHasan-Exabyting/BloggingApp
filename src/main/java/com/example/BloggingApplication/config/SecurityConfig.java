@@ -1,5 +1,6 @@
 package com.example.BloggingApplication.config;
 
+import com.example.BloggingApplication.exception.JWTAuthenticationException;
 import com.example.BloggingApplication.service.BlogUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -27,17 +28,21 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
+
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
 
         return httpSecurity.csrf(customizer -> customizer.disable()) //disable CSRF token
                     .authorizeHttpRequests(request -> request
-                    .requestMatchers("/api/users/register","/api/users/login")
+                    .requestMatchers("api/v1/users/register","api/v1/users/login")
                     .permitAll()
+                    .requestMatchers("*/admin/*").hasAnyAuthority("ROLE_ADMIN")
                     .anyRequest().authenticated())
                     .httpBasic(Customizer.withDefaults())
                     .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                     .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                    .exceptionHandling(exception -> exception.accessDeniedPage("/403"))
                     .build();
     }
 

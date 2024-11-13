@@ -1,10 +1,14 @@
 package com.example.BloggingApplication.service;
 
+import com.example.BloggingApplication.exception.JWTAuthenticationException;
+import com.example.BloggingApplication.model.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +39,8 @@ public class JWTService {
 
     public String generateToken(String userName) {
         Map<String, Object> claims = new HashMap<>();
+        Role role = (userName.equals("admin") ? Role.ROLE_ADMIN : Role.ROLE_USER);
+        claims.put("Roles", role);
         return Jwts.builder()
                 .claims()
                 .add(claims)
@@ -52,25 +58,54 @@ public class JWTService {
     }
 
     public String extractUserName(String token) {
-        return extractClaim(token, Claims::getSubject);
+        String userName = extractClaim(token, Claims::getSubject);
+        return userName;
     }
 
     private <T> T extractClaim(String token, Function<Claims, T> claimResolver) 
     {
         final Claims claims = extractAllClaims(token);
+        if(claims == null)
+        {
+            return null;
+        }
         return claimResolver.apply(claims);
     }
 
-    private Claims extractAllClaims(String token) {
-        return Jwts.parser().verifyWith(getKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+    private Claims extractAllClaims(String token){
+        try
+        {
+            Claims claims = Jwts.parser().verifyWith(getKey())
+            .build()
+            .parseSignedClaims(token)
+            .getPayload();
+            return claims;
+        }
+        catch (NullPointerException nullPointerException)
+        {
+            return null;
+        }
+        catch (JwtException jwtException)
+        {
+            return null;
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
     }
 
     public boolean validateToken(String token, UserDetails userDetails) {
         final String userName = extractUserName(token);
-        return (userName.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        if(userName == null)
+        {
+            System.out.println("Here userName null");
+            return false;
+        }
+        else
+        {
+            return (userName.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        }
     }
 
     private boolean isTokenExpired(String token) {
@@ -79,5 +114,10 @@ public class JWTService {
 
     private Date extractExpiration(String token) {
         return extractClaim(token,Claims::getExpiration);
+    }
+
+    public Role extractRole(String token) {
+        Claims claims = extractAllClaims(token);
+        return Role.valueOf(claims.get("Roles").toString());
     }
 }

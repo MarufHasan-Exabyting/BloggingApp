@@ -53,4 +53,16 @@ public class ExceptionHandlerController {
     {
         return ResponseUtil.error(Arrays.asList(commentNotFoundException.getMessage()),"Comment Not found",400, request.getRequestURI());
     }
+
+    @ExceptionHandler(JWTAuthenticationException.class)
+    public ApiResponse<Object> handleJWTAuthenticationException(JWTAuthenticationException jwtAuthenticationException, HttpServletRequest request)
+    {
+        return ResponseUtil.error(Arrays.asList(jwtAuthenticationException.getMessage()),"Token not authenticated",400, request.getRequestURI());
+    }
+
+    @ExceptionHandler(SignatureException.class)
+    public ApiResponse<Object> handleSignatureException(SignatureException signatureException, HttpServletRequest request)
+    {
+        return ResponseUtil.error(Arrays.asList(signatureException.getMessage()),"Signature not verified",400, request.getRequestURI());
+    }
 }

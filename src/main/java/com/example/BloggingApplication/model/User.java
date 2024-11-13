@@ -26,22 +26,24 @@ public class User {
     @Column(name = "email")
     private String userEmail;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role")
+    private Role role;
+
     @Embedded
     EntityMetadata metadata;
 
     public User() {
     }
 
-    public User(int userId, String firstName, String lastName,
-                String userName, String password, String userEmail,
-                EntityMetadata metadata)
-    {
+    public User(int userId, String firstName, String lastName, String userName, String password, String userEmail, Role role, EntityMetadata metadata) {
         this.userId = userId;
         this.firstName = firstName;
         this.lastName = lastName;
         this.userName = userName;
         this.password = password;
         this.userEmail = userEmail;
+        this.role = role;
         this.metadata = metadata;
     }
 
@@ -101,6 +103,14 @@ public class User {
         this.userName = userName;
     }
 
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -110,6 +120,7 @@ public class User {
                 ", userName='" + userName + '\'' +
                 ", password='" + password + '\'' +
                 ", userEmail='" + userEmail + '\'' +
+                ", role=" + role +
                 ", metadata=" + metadata +
                 '}';
     }

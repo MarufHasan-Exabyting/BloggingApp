@@ -9,10 +9,7 @@ import com.example.BloggingApplication.dto.ResponseUserDTO;
 import com.example.BloggingApplication.dto.UpdateUserDTO;
 import com.example.BloggingApplication.exception.UserCreateException;
 import com.example.BloggingApplication.exception.UserNotFoundException;
-import com.example.BloggingApplication.model.EntityMetadata;
-import com.example.BloggingApplication.model.User;
-import com.example.BloggingApplication.model.UserPrincipal;
-import com.example.BloggingApplication.model.UserProfile;
+import com.example.BloggingApplication.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -136,22 +133,23 @@ public class UserServiceImpl implements UserService {
     //Helper functions
     public User createUserFromDTO(CreateUserDTO createUserDTO)
     {
-        System.out.println("Line 132");
+
         if(isUserExist(createUserDTO.getUserEmail()))
         {
             throw new UserCreateException(String.format("User with mail %s already exists",createUserDTO.getUserEmail()));
         }
         else if(!isUserNameAvailable(createUserDTO.getUserName()))
         {
-            throw new UserCreateException(String.format("UserName %d not available",createUserDTO.getUserName()));
+            throw new UserCreateException(String.format("UserName %s not available",createUserDTO.getUserName()));
         }
-
+        System.out.println("Line 148");
         User user = new User();
         user.setFirstName(createUserDTO.getFirstName());
         user.setLastName(createUserDTO.getLastName());
         user.setPassword(bCryptPasswordEncoder.encode(createUserDTO.getPassword()));
         user.setUserEmail(createUserDTO.getUserEmail());
         user.setUserName(createUserDTO.getUserName());
+        user.setRole(Role.ROLE_USER);
 
 
         EntityMetadata metadata = Common.getEntityMetadata(new Date(System.currentTimeMillis()), new Date(System.currentTimeMillis()));
@@ -163,7 +161,7 @@ public class UserServiceImpl implements UserService {
         {
             throw new UserCreateException("User Not created Exception");
         }
-        //System.out.println(createdUser);
+        System.out.println("line 166 "+createdUser);
         return createdUser;
     }
 
@@ -175,7 +173,9 @@ public class UserServiceImpl implements UserService {
 
     private boolean isUserNameAvailable(String userName)
     {
+        System.out.println("Line 178 "+userName);
         User user = userDao.getUserByUserName(userName);
+        System.out.println("Line 180 "+user);
         return (user == null);
     }
 

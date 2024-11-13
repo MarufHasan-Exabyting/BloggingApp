@@ -1,5 +1,7 @@
 package com.example.BloggingApplication.config;
 
+import com.example.BloggingApplication.exception.JWTAuthenticationException;
+import com.example.BloggingApplication.model.Role;
 import com.example.BloggingApplication.service.BlogUserDetailsService;
 import com.example.BloggingApplication.service.JWTService;
 import jakarta.servlet.FilterChain;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Map;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -34,29 +37,41 @@ public class JwtFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
         String token = null;
         String userName = null;
+        Role role = null;
+
 
         if(authHeader != null && authHeader.startsWith("Bearer "))
         {
             token = authHeader.substring(7);
             userName = jwtService.extractUserName(token);
         }
-
         if(userName != null && SecurityContextHolder.getContext().getAuthentication() == null)
         {
             UserDetails userDetails = applicationContext.getBean(BlogUserDetailsService.class).loadUserByUsername(userName);
+            role = jwtService.extractRole(token);
 
-            if(jwtService.validateToken(token, userDetails))
+            boolean isAuthorize = checkRoleAuthroization(role,request.getRequestURI());
+
+            if(jwtService.validateToken(token, userDetails) && isAuthorize)
             {
-                System.out.println("Line 51 JWTFIlter validated");
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
                         = new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
 
                 usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-
             }
         }
-        System.out.println(userName);
         filterChain.doFilter(request, response);
+    }
+
+
+    boolean checkRoleAuthroization(Role role, String url)
+    {
+        System.out.println(role.toString() + " " + url);
+        if(url.contains("admin") && role != Role.ROLE_ADMIN)
+        {
+            return false;
+        }
+        return true;
     }
 }

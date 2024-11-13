@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("api/v1/")
 public class UserController {
     private UserService userService;
 
@@ -21,44 +21,43 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/register")
+    @PostMapping("/users/register")
     public ResponseEntity<ApiResponse<ResponseUserDTO> >  createUser(@Valid @RequestBody CreateUserDTO user, HttpServletRequest request)
     {
         ResponseUserDTO responseUserDTO = userService.RegisterUser(user);
         return ResponseEntity.ok(ResponseUtil.success(responseUserDTO,"User created successfully", request.getRequestURI()));
     }
 
-    @PostMapping("/login")
+    @PostMapping("/users/login")
     public String logInUser(@Valid @RequestBody LogInDTO logInDTO)
     {
         System.out.println(logInDTO);
         return userService.verifyLogin(logInDTO);
     }
 
-
-
-    @GetMapping("/")
+    @GetMapping("/admin/users")
     public ResponseEntity<ApiResponse<List<ResponseUserDTO>> > getAllUsers(HttpServletRequest request)
     {
         List<ResponseUserDTO> responseUserDTOS = userService.getAllUsers();
         return ResponseEntity.ok(ResponseUtil.success(responseUserDTOS, "Successfully fetched all users", request.getRequestURI()));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/users/{id}")
     public ResponseEntity<ApiResponse<ResponseUserDTO> > getUserById(@Valid @PathVariable int id, HttpServletRequest request)
     {
         ResponseUserDTO responseUserDTO = userService.getUserById(id);
         return ResponseEntity.ok(ResponseUtil.success(responseUserDTO, String.format("User with Id : %d successfully retrived",id),request.getRequestURI()));
     }
 
-    @PutMapping("/")
+    //needs to change the UPDATEDTO and respective logic
+    @PutMapping("/users")
     public ResponseEntity<ApiResponse<ResponseUserDTO> > updateUser(@Valid @RequestBody UpdateUserDTO user, HttpServletRequest request)
     {
         ResponseUserDTO responseUserDTO = userService.updateUser(user);
-        return ResponseEntity.ok(ResponseUtil.success(responseUserDTO, String.format("Succesflly updated the user with userId: %d",user.getUserId()),request.getRequestURI()));
+        return ResponseEntity.ok(ResponseUtil.success(responseUserDTO, String.format("Successfully updated the user with userId: %d",user.getUserId()),request.getRequestURI()));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/users/{id}")
     public ResponseEntity<ApiResponse<Integer>> deleteUser(@Valid @PathVariable int id, HttpServletRequest request)
     {
         int deletedCount = userService.deleteUser(id);
