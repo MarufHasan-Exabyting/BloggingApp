@@ -58,6 +58,12 @@ public class UserController {
     @PutMapping("/users")
     public ResponseEntity<ApiResponse<ResponseUserDTO> > updateUser(@Valid @RequestBody UpdateUserDTO user, HttpServletRequest request)
     {
+        System.out.println("Line 61 "+user);
+        boolean canUpdate = authorizationService.checkIfAuthorizeToUpdate(user.getUserId(),request);
+        if(!canUpdate)
+        {
+            throw new AuthorizationException("Does not have permission to Update the User with UserId : " + user.getUserId());
+        }
         ResponseUserDTO responseUserDTO = userService.updateUser(user);
         return ResponseEntity.ok(ResponseUtil.success(responseUserDTO, String.format("Successfully updated the user with userId: %d",user.getUserId()),request.getRequestURI()));
     }

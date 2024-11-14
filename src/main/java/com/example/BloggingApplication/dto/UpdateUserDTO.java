@@ -12,6 +12,10 @@ public class UpdateUserDTO {
     @NotEmpty(message = "Last Name is required")
     private String lastName;
 
+    @NotEmpty(message = "User Name is required")
+    @Pattern(regexp="^[A-Za-z0-9_]*$", message = "Invalid Input")
+    private String userName;
+
     @NotEmpty(message = "password is required")
     @Size(min = 6,max = 20,message = "Length of password should be between 6-20")
     private String password;
@@ -69,5 +73,13 @@ public class UpdateUserDTO {
 
     public void setUserEmail(String userEmail) {
         this.userEmail = userEmail;
+    }
+
+    public @NotEmpty(message = "User Name is required") String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(@NotEmpty(message = "User Name is required") String userName) {
+        this.userName = userName;
     }
 }

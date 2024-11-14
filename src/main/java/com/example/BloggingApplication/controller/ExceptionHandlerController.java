@@ -19,7 +19,7 @@ public class ExceptionHandlerController {
     }
 
     @ExceptionHandler(UserNotFoundException.class)
-    public ApiResponse<Object> handleException(UserNotFoundException userNotFoundException, HttpServletRequest request)
+    public ApiResponse<Object> handleUserNotFoundException(UserNotFoundException userNotFoundException, HttpServletRequest request)
     {
         return  ResponseUtil.error(Arrays.asList(userNotFoundException.getMessage()),"User not Found ", 404, request.getRequestURI());
     }

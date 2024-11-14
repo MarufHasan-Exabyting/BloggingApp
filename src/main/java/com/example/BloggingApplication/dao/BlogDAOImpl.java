@@ -75,6 +75,7 @@ public class BlogDAOImpl implements BlogDAO{
     public BlogPost updatePost(BlogPost blogPost) {
         BlogPost previousBlog = getBlogPostByPostId(blogPost.getPostId());
         EntityMetadata metadata = Common.getEntityMetadata(previousBlog.getMetadata().getCreatedAt(), new Date(System.currentTimeMillis()));
+        metadata.setDeleted(false);
         blogPost.setMetadata(metadata);
         entityManager.merge(blogPost);
         return blogPost;

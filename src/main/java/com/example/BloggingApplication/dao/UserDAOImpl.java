@@ -1,6 +1,7 @@
 package com.example.BloggingApplication.dao;
 
 import com.example.BloggingApplication.exception.UserNotFoundException;
+import com.example.BloggingApplication.model.EntityMetadata;
 import com.example.BloggingApplication.model.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -22,7 +23,7 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public User createUser(User user) {
-        //System.out.println(user);
+        System.out.println(user);
         entityManager.persist(user);
         return user;
     }
@@ -48,7 +49,8 @@ public class UserDAOImpl implements UserDAO {
     @Override
     public User updateUser(User user) {
         User user_beforeUpdate = entityManager.find(User.class,user.getUserId());
-        user.setMetadata(user_beforeUpdate.getMetadata());
+        EntityMetadata entityMetadata = new EntityMetadata(user_beforeUpdate.getMetadata().getCreatedAt(),new Date(System.currentTimeMillis()),false,null);
+        user.setMetadata(entityMetadata);
         entityManager.merge(user);
         return entityManager.find(User.class,user.getUserId());
     }

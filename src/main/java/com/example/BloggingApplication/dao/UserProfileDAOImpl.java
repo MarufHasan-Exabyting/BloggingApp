@@ -78,6 +78,11 @@ public class UserProfileDAOImpl implements UserProfileDAO{
         deleteUserProfileByUser(deletedUser);
     }
 
+    @Override
+    public UserProfile getUserProfileByUserProfileId(int userProfileId) {
+        return entityManager.find(UserProfile.class, userProfileId);
+    }
+
     //Helper class
     //get user by userId
 

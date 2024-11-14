@@ -47,6 +47,16 @@ public class User {
         this.metadata = metadata;
     }
 
+    public User(String firstName, String lastName, String userName, String password, String userEmail, Role role, EntityMetadata metadata) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.userName = userName;
+        this.password = password;
+        this.userEmail = userEmail;
+        this.role = role;
+        this.metadata = metadata;
+    }
+
     public String getFirstName() {
         return firstName;
     }

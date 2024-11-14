@@ -4,6 +4,8 @@ import com.example.BloggingApplication.dto.ApiResponse;
 import com.example.BloggingApplication.dto.CreatePostDTO;
 import com.example.BloggingApplication.dto.ResponseBlogPostDTO;
 import com.example.BloggingApplication.dto.UpdatePostDTO;
+import com.example.BloggingApplication.exception.AuthorizationException;
+import com.example.BloggingApplication.service.AuthorizationService;
 import com.example.BloggingApplication.service.BlogService;
 import com.example.BloggingApplication.util.ResponseUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,14 +20,22 @@ import java.util.List;
 @RequestMapping("api/v1")
 public class BlogPostController {
     private BlogService blogService;
+    private AuthorizationService authorizationService;
 
     @Autowired
-    public BlogPostController(BlogService blogService) {
+    public BlogPostController(BlogService blogService, AuthorizationService authorizationService) {
         this.blogService = blogService;
+        this.authorizationService = authorizationService;
     }
 
     @PostMapping("/blog")
     public ResponseEntity<ApiResponse<ResponseBlogPostDTO> >  createBlogPost(@Valid @RequestBody CreatePostDTO createPostDTO, HttpServletRequest request) {
+        //needs to check if the createPostDTO has same postAuthorId as the tokenId
+        if(!authorizationService.checkIfAuthorizeToCreateBlog(createPostDTO.getPostAuthorId(), request))
+        {
+            throw new AuthorizationException("Does not have authorization");
+        }
+
         ResponseBlogPostDTO createdBlogPost = blogService.createBlogPost(createPostDTO);
         return ResponseEntity.ok(ResponseUtil.success(createdBlogPost,"Blog post created successfully.",request.getRequestURI()));
     }
@@ -59,6 +69,10 @@ public class BlogPostController {
     @PutMapping("/blog")
     public ResponseEntity<ApiResponse<ResponseBlogPostDTO> > updateBlogPost(@Valid @RequestBody UpdatePostDTO updatePostDTO, HttpServletRequest request)
     {
+        if(!authorizationService.checkIfAuthorizeToUpdateBlog(updatePostDTO.getPostId(), updatePostDTO.getPostAuthorId(), request))
+        {
+            throw new AuthorizationException("Does not have authorization");
+        }
         ResponseBlogPostDTO blogPost = blogService.updatePost(updatePostDTO);
         return ResponseEntity.ok(ResponseUtil.success(blogPost,"The post successfully updated", request.getRequestURI()));
     }
@@ -66,6 +80,10 @@ public class BlogPostController {
     @DeleteMapping("/blog/{postId}")
     public ResponseEntity<ApiResponse<Integer>> deleteBlogPost(@Valid @PathVariable int postId, HttpServletRequest request)
     {
+        if(!authorizationService.checkIfAuthorizeToDeleteBlog(postId, request))
+        {
+            throw new AuthorizationException("Does not have authorization");
+        }
         int deletedCount = blogService.deletePostById(postId);
         return ResponseEntity.ok(ResponseUtil.success(deletedCount,String.format("Blogpost with postId : %d successfully deleted",postId), request.getRequestURI()));
     }

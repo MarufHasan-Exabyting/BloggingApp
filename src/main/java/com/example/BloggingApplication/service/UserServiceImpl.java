@@ -14,9 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -89,16 +86,21 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public ResponseUserDTO updateUser(UpdateUserDTO updateUserDTO) {
+        //check if userName exists
+        User userByUserName = userDao.getUserByUserName(updateUserDTO.getUserName());
+        if(userByUserName != null && (userByUserName.getUserId() != updateUserDTO.getUserId()))
+        {
+            System.out.println(userByUserName.getUserId() + " Line 93 " + updateUserDTO.getUserId());
+            throw new UserCreateException(String.format("User with User_Name already exists",updateUserDTO.getUserName()));
+        }
+
         User user = getUserFromUpdateUserDTO(updateUserDTO);
+
         if (userDao.getUserById(user.getUserId()) == null)
         {
             throw new UserNotFoundException(String.format("User with User ID %d not found",user.getUserId()));
         }
         User updatedUser = userDao.updateUser(user);
-
-        EntityMetadata entityMetadata = Common.getEntityMetadata(updatedUser.getMetadata().getCreatedAt(),new Date(System.currentTimeMillis()));
-        entityMetadata.setDeleted(false);
-        updatedUser.setMetadata(entityMetadata);
 
         UserProfile userProfile = userProfileDAO.getUserProfileByUserId(updatedUser.getUserId());
         if(userProfile == null)
@@ -207,15 +209,16 @@ public class UserServiceImpl implements UserService {
         user.setUserId(updateUserDTO.getUserId());
         user.setFirstName(updateUserDTO.getFirstName());
         user.setLastName(updateUserDTO.getLastName());
-        user.setPassword(updateUserDTO.getPassword());
+        user.setPassword(bCryptPasswordEncoder.encode(updateUserDTO.getPassword()));
         user.setUserEmail(updateUserDTO.getUserEmail());
+        user.setUserName(updateUserDTO.getUserName());
+        user.setRole(Role.ROLE_USER);
         return user;
     }
 
     private UserProfile getUpdatedUserProfileFromUpdatedUser(UserProfile userProfile, User updatedUser)
     {
-        String userName = updatedUser.getFirstName() + " " + updatedUser.getLastName();
-        userProfile.setUserName(userName);
+        userProfile.setUserName(updatedUser.getUserName());
         userProfile.setUserEmail(updatedUser.getUserEmail());
         EntityMetadata metadata = userProfile.getMetadata();
         metadata.setUpdatedAt(new Date(System.currentTimeMillis()));
