@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -87,22 +88,31 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public ResponseUserDTO updateUser(UpdateUserDTO updateUserDTO) {
         //check if userName exists
-        User userByUserName = userDao.getUserByUserName(updateUserDTO.getUserName());
-        if(userByUserName != null && (userByUserName.getUserId() != updateUserDTO.getUserId()))
+        User UpdatingUser = userDao.getUserByUserName(updateUserDTO.getUserName());
+
+        if(UpdatingUser == null)
         {
-            System.out.println(userByUserName.getUserId() + " Line 93 " + updateUserDTO.getUserId());
+            throw new UserNotFoundException(String.format("User with UserName %s not found",updateUserDTO.getUserName()));
+        }
+
+        //check if both of their UserId is same.
+        if((UpdatingUser.getUserId() != updateUserDTO.getUserId()))
+        {
+            System.out.println(UpdatingUser.getUserId() + " Line 93 " + updateUserDTO.getUserId());
             throw new UserCreateException(String.format("User with User_Name already exists",updateUserDTO.getUserName()));
         }
 
-        User user = getUserFromUpdateUserDTO(updateUserDTO);
+        System.out.println("Before Update : " +UpdatingUser);
 
-        if (userDao.getUserById(user.getUserId()) == null)
-        {
-            throw new UserNotFoundException(String.format("User with User ID %d not found",user.getUserId()));
-        }
-        User updatedUser = userDao.updateUser(user);
+        User UpdatedUserFromDto = getUserFromUpdateUserDTO(updateUserDTO,UpdatingUser);
+
+
+        User updatedUser = userDao.updateUser(UpdatedUserFromDto);
+
+        System.out.println("After Update " + updatedUser);
 
         UserProfile userProfile = userProfileDAO.getUserProfileByUserId(updatedUser.getUserId());
+
         if(userProfile == null)
         {
             throw new UserNotFoundException(String.format("UserProfile with UserId %d not found.",updatedUser.getUserId()));
@@ -203,17 +213,40 @@ public class UserServiceImpl implements UserService {
         return responseUserDTO;
     }
 
-    private User getUserFromUpdateUserDTO(UpdateUserDTO updateUserDTO)
+    private User getUserFromUpdateUserDTO(UpdateUserDTO updateUserDTO, User updatingUser)
     {
-        User user = new User();
-        user.setUserId(updateUserDTO.getUserId());
-        user.setFirstName(updateUserDTO.getFirstName());
-        user.setLastName(updateUserDTO.getLastName());
-        user.setPassword(bCryptPasswordEncoder.encode(updateUserDTO.getPassword()));
-        user.setUserEmail(updateUserDTO.getUserEmail());
-        user.setUserName(updateUserDTO.getUserName());
-        user.setRole(Role.ROLE_USER);
-        return user;
+        //The following Fields can be updated
+        //
+    /*
+        private String firstName;
+
+        private String lastName;
+
+        private String password;
+    */
+
+        if(updateUserDTO.getFirstName() != null)
+        {
+            updatingUser.setFirstName(updateUserDTO.getFirstName());
+        }
+        if(updateUserDTO.getLastName() !=null)
+        {
+            updatingUser.setLastName(updateUserDTO.getLastName());
+        }
+        if(updateUserDTO.getPassword() != null)
+        {
+            int lengthOfPassword = updateUserDTO.getPassword().length();
+            //check password length
+            if(lengthOfPassword <6 || lengthOfPassword >20)
+            {
+                throw new UserNotFoundException("Password must be between 6-20 character");
+            }
+            updatingUser.setPassword(bCryptPasswordEncoder.encode(updateUserDTO.getPassword()));
+        }
+
+        updatingUser.getMetadata().setUpdatedAt(new Date(System.currentTimeMillis()));
+
+        return updatingUser;
     }
 
     private UserProfile getUpdatedUserProfileFromUpdatedUser(UserProfile userProfile, User updatedUser)

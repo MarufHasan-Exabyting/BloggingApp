@@ -50,14 +50,13 @@ public class UserController {
     public ResponseEntity<ApiResponse<ResponseUserDTO> > getUserById(@Valid @PathVariable int id, HttpServletRequest request)
     {
         ResponseUserDTO responseUserDTO = userService.getUserById(id);
-        return ResponseEntity.ok(ResponseUtil.success(responseUserDTO, String.format("User with Id : %d successfully retrived",id),request.getRequestURI()));
+        return ResponseEntity.ok(ResponseUtil.success(responseUserDTO, String.format("User with Id : %d successfully retrieved",id),request.getRequestURI()));
     }
 
-    //needs to change the UPDATEDTO and respective logic
+    //needs to change the UpdateDTO and respective logic
     @PutMapping("/users")
     public ResponseEntity<ApiResponse<ResponseUserDTO> > updateUser(@Valid @RequestBody UpdateUserDTO user, HttpServletRequest request)
     {
-        System.out.println("Line 61 "+user);
         boolean canUpdate = authorizationService.checkIfAuthorizeToUpdate(user.getUserId(),request);
         if(!canUpdate)
         {

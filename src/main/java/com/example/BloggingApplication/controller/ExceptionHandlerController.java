@@ -4,11 +4,12 @@ import com.example.BloggingApplication.dto.ApiResponse;
 import com.example.BloggingApplication.exception.*;
 import com.example.BloggingApplication.util.ResponseUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.Arrays;
+import java.util.*;
 
 @RestControllerAdvice
 public class ExceptionHandlerController {
@@ -33,7 +34,14 @@ public class ExceptionHandlerController {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ApiResponse<Object> handleValidationException(MethodArgumentNotValidException methodArgumentNotValidException, HttpServletRequest request)
     {
-        return ResponseUtil.error(Arrays.asList(methodArgumentNotValidException.getMessage()),"Validation Error",400, request.getRequestURI());
+        //System.out.println("Validation Error");
+        List<String> errors = new ArrayList<>();
+
+        methodArgumentNotValidException.getAllErrors().forEach(error -> {
+            String errorMessage = error.getDefaultMessage();
+            errors.add(errorMessage);
+        });
+        return ResponseUtil.error(errors,"Validation Failed",400, request.getRequestURI());
     }
 
     @ExceptionHandler(BlogPostNotFoundException.class)

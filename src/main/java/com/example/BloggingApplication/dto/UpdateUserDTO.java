@@ -3,26 +3,25 @@ package com.example.BloggingApplication.dto;
 import jakarta.validation.constraints.*;
 
 public class UpdateUserDTO {
+
+    //Required Fields for UpdateUserDTO
     @Positive
     private int userId;
-
-    @NotEmpty(message = "First Name is required")
-    private String firstName;
-
-    @NotEmpty(message = "Last Name is required")
-    private String lastName;
 
     @NotEmpty(message = "User Name is required")
     @Pattern(regexp="^[A-Za-z0-9_]*$", message = "Invalid Input")
     private String userName;
 
-    @NotEmpty(message = "password is required")
-    @Size(min = 6,max = 20,message = "Length of password should be between 6-20")
+    //Optional Fields
+    //Fields which can be updated
+
+    private String firstName;
+
+    private String lastName;
+
     private String password;
 
-    @Email
-    @NotNull
-    private String userEmail;
+
 
     public int getUserId() {
         return userId;
@@ -35,12 +34,11 @@ public class UpdateUserDTO {
     public UpdateUserDTO() {
     }
 
-    public UpdateUserDTO(int userId, String firstName, String lastName, String password, String userEmail) {
+    public UpdateUserDTO(int userId, String firstName, String lastName, String password) {
         this.userId = userId;
         this.firstName = firstName;
         this.lastName = lastName;
         this.password = password;
-        this.userEmail = userEmail;
     }
 
     public String getFirstName() {
@@ -67,13 +65,6 @@ public class UpdateUserDTO {
         this.password = password;
     }
 
-    public String getUserEmail() {
-        return userEmail;
-    }
-
-    public void setUserEmail(String userEmail) {
-        this.userEmail = userEmail;
-    }
 
     public @NotEmpty(message = "User Name is required") String getUserName() {
         return userName;

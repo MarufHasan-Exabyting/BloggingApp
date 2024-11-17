@@ -3,6 +3,7 @@ package com.example.BloggingApplication.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 
@@ -16,6 +17,7 @@ public class CreateUserDTO {
 
 
     @NotEmpty(message = "UserName is required")
+    @Pattern(regexp="^[A-Za-z0-9_]*$", message = "Invalid Input")
     private String userName;
 
     @NotEmpty(message = "password is required")
@@ -23,6 +25,7 @@ public class CreateUserDTO {
     private String password;
 
     @Email
+    @NotEmpty(message = "User Email can not be empty")
     private String userEmail;
 
     public CreateUserDTO() {

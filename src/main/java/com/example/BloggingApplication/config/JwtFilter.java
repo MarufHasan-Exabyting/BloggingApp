@@ -52,7 +52,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
             boolean isAuthorize = Utility.checkRoleAuthroization(role,request.getRequestURI());
 
-
             if(jwtService.validateToken(token, userDetails) && isAuthorize)
             {
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken

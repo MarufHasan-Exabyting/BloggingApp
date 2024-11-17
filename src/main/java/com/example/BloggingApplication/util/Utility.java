@@ -19,7 +19,6 @@ public class Utility {
 
     public static boolean checkRoleAuthroization(Role role, String url)
     {
-        System.out.println(role.toString() + " " + url);
         if(url.contains("admin") && role != Role.ROLE_ADMIN)
         {
             return false;
