@@ -1,6 +1,5 @@
 package com.example.BloggingApplication.config;
 
-import com.example.BloggingApplication.exception.JWTAuthenticationException;
 import com.example.BloggingApplication.service.BlogUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

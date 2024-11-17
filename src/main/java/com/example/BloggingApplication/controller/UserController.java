@@ -2,7 +2,6 @@ package com.example.BloggingApplication.controller;
 
 import com.example.BloggingApplication.dto.*;
 import com.example.BloggingApplication.exception.AuthorizationException;
-import com.example.BloggingApplication.exception.ResourceNotFoundException;
 import com.example.BloggingApplication.service.AuthorizationService;
 import com.example.BloggingApplication.service.UserService;
 import com.example.BloggingApplication.util.ResponseUtil;

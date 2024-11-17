@@ -7,9 +7,7 @@ import java.util.Date;
 public class Common {
     public static <Property, Parameter> String getDynamicQuery(Class<?> table, Property property, Parameter parameter)
     {
-        System.out.println(table.getSimpleName());
         String query = "From " + table.getSimpleName() + " where " + property + " = " + parameter + " and metadata.isDeleted = false";
-        System.out.println("Dynamic Query " + query);
         return  query;
     }
 

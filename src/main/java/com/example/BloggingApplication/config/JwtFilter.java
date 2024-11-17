@@ -1,6 +1,6 @@
 package com.example.BloggingApplication.config;
 
-import com.example.BloggingApplication.exception.JWTAuthenticationException;
+
 import com.example.BloggingApplication.model.Role;
 import com.example.BloggingApplication.service.BlogUserDetailsService;
 import com.example.BloggingApplication.service.JWTService;
@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Map;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -53,7 +52,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
             boolean isAuthorize = Utility.checkRoleAuthroization(role,request.getRequestURI());
 
-            boolean hasModificationAuthority = checkModificationAuthority(token,request);
 
             if(jwtService.validateToken(token, userDetails) && isAuthorize)
             {
@@ -66,18 +64,4 @@ public class JwtFilter extends OncePerRequestFilter {
         }
         filterChain.doFilter(request, response);
     }
-
-    private boolean checkModificationAuthority(String token, HttpServletRequest request) {
-        //check if the request is update or delete
-        System.out.println(request.getMethod());
-
-        //check who is the owner of the resource
-        //only Owner can modify the user,blogpost and comment
-        //Owner and Admin can delete the user and blogpost
-        // Blogpost owner, commentator and Admin can delete the comment
-        String userName = jwtService.extractUserName(token);
-        return true;
-    }
-
-
 }

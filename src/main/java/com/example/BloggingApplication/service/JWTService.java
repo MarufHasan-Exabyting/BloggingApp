@@ -1,6 +1,5 @@
 package com.example.BloggingApplication.service;
 
-import com.example.BloggingApplication.exception.JWTAuthenticationException;
 import com.example.BloggingApplication.model.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwt;

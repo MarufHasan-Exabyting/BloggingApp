@@ -4,10 +4,7 @@ import com.example.BloggingApplication.dao.BlogDAO;
 import com.example.BloggingApplication.dao.CommentDAO;
 import com.example.BloggingApplication.dao.UserDAO;
 import com.example.BloggingApplication.dao.UserProfileDAO;
-import com.example.BloggingApplication.model.BlogPost;
-import com.example.BloggingApplication.model.Role;
-import com.example.BloggingApplication.model.User;
-import com.example.BloggingApplication.model.UserProfile;
+import com.example.BloggingApplication.model.*;
 import com.example.BloggingApplication.util.Utility;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -36,10 +33,6 @@ public class AuthorizationService {
     public boolean checkIfAuthorizeToDeleteUser(int deleteId, HttpServletRequest request)
     {
         String token = Utility.getTokenFromRequest(request);
-        if(token == null)
-        {
-            return false;
-        }
         String userName = jwtService.extractUserName(token);
         User user = userDAO.getUserById(deleteId);
         
@@ -49,27 +42,16 @@ public class AuthorizationService {
     public boolean checkIfAuthorizeToUpdate(int userId, HttpServletRequest request) {
         User user = userDAO.getUserById(userId);
         String token = Utility.getTokenFromRequest(request);
-        if(token == null)
-        {
-            return false;
-        }
         String requestedUserName = jwtService.extractUserName(token);
+
         //checking whether the tokenOwner and updatingProfileOwner same or not
-        if(requestedUserName.equals(user.getUserName()))
-        {
-            return true;
-        }
-        return false;
+        return requestedUserName.equals(user.getUserName());
     }
 
     public boolean checkIfAuthorizeToCreateBlog(int postAuthorId, HttpServletRequest request)
     {
         User postAuthor = userDAO.getUserById(postAuthorId);
         String token = Utility.getTokenFromRequest(request);
-        if(token == null)
-        {
-            return false;
-        }
         String blogCreatorUserName = jwtService.extractUserName(token);
         return blogCreatorUserName.equals(postAuthor.getUserName());
     }
@@ -85,16 +67,10 @@ public class AuthorizationService {
 
         UserProfile blogPostAuthorById = userProfileDAO.getUserProfileByUserId(postAuthorId);
         String token = Utility.getTokenFromRequest(request);
-        if(token == null)
-        {
-            return false;
-        }
+
         String blogUpdaterName = jwtService.extractUserName(token);
-        if(blogUpdaterName.equals(blogPostAuthorById.getUserName()) && (blogUpdaterName.equals(PostAuthor.getUserName())))
-        {
-            return true;
-        }
-        return false;
+
+        return blogUpdaterName.equals(blogPostAuthorById.getUserName()) && (blogUpdaterName.equals(PostAuthor.getUserName()));
     }
 
     public boolean checkIfAuthorizeToDeleteBlog(@Valid int postId, HttpServletRequest request) {
@@ -102,16 +78,40 @@ public class AuthorizationService {
         UserProfile userProfile = blogPost.getPostAuthorId();
         String blogPostAuthorUserName = userProfile.getUserName();
         String token = Utility.getTokenFromRequest(request);
-        if(token == null)
-        {
-            return false;
-        }
+
         String requesterName = jwtService.extractUserName(token);
         Role role = jwtService.extractRole(token);
-        if(blogPostAuthorUserName.equals(requesterName) || role == Role.ROLE_ADMIN)
-        {
-            return true;
-        }
-        return false;
+
+        return blogPostAuthorUserName.equals(requesterName) || role == Role.ROLE_ADMIN;
+    }
+
+    public boolean checkIfAuthorizeToComment(int commentatorId, HttpServletRequest request) {
+        String token = Utility.getTokenFromRequest(request);
+
+        String commentatorFromRequest = jwtService.extractUserName(token);
+        UserProfile userProfile = userProfileDAO.getUserProfileByUserProfileId(commentatorId);
+        String userName = userProfile.getUserName();
+        return userName.equals(commentatorFromRequest);
+    }
+
+    public boolean checkIfAuthorizeToUpdateComment(int commentId, HttpServletRequest request) {
+        Comment comment = commentDAO.getCommentByCommentId(commentId);
+        UserProfile userProfile = comment.getCommentator();
+        String userName = userProfile.getUserName();
+        String token = Utility.getTokenFromRequest(request);
+        String commentUpdatedBy = jwtService.extractUserName(token);
+        return commentUpdatedBy.equals(userName);
+    }
+
+    public boolean checkIfAuthorizeToDeleteComment(@Valid int commentId, HttpServletRequest request) {
+        Comment comment = commentDAO.getCommentByCommentId(commentId);
+        UserProfile commentator = comment.getCommentator();
+        BlogPost blogPost = comment.getBlogPost();
+        UserProfile blogPostUserProfile = blogPost.getPostAuthorId();
+        String blogPostAuthor = blogPostUserProfile.getUserName();
+        String token = Utility.getTokenFromRequest(request);
+
+        String requesterUserName = jwtService.extractUserName(token);
+        return requesterUserName.equals(commentator.getUserName()) || requesterUserName.equals(blogPostAuthor) || requesterUserName.equals("admin");
     }
 }
