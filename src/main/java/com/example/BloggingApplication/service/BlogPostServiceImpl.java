@@ -46,7 +46,6 @@ public class BlogPostServiceImpl implements BlogService{
 
     @Override
     public List<ResponseBlogPostDTO> getAllPosts() {
-        System.out.println("Service Layer 49 line");
         return getResponsePosts(blogDAO.getAllPosts());
     }
 
