@@ -1,10 +1,7 @@
 package com.example.BloggingApplication.util;
 
-import com.example.BloggingApplication.config.JwtFilter;
 import com.example.BloggingApplication.model.Role;
-import com.example.BloggingApplication.service.JWTService;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class Utility {
 
