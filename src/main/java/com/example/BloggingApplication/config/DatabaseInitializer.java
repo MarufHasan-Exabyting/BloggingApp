@@ -33,7 +33,6 @@ public class DatabaseInitializer implements CommandLineRunner {
         User existingUser = userDAO.getUserByUserName("admin");
         if(existingUser == null)
         {
-            System.out.println("Here in Database line 63" + admin);
             admin = userDAO.createUser(admin);
             UserProfile adminUserProfile = createUserProfile(admin);
             userProfileDAO.createUserProfile(adminUserProfile);

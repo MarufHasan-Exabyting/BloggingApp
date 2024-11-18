@@ -23,7 +23,6 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public User createUser(User user) {
-        System.out.println(user);
         entityManager.persist(user);
         return user;
     }

@@ -98,7 +98,6 @@ public class JWTService {
         final String userName = extractUserName(token);
         if(userName == null)
         {
-            System.out.println("Here userName null");
             return false;
         }
         else

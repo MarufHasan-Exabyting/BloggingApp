@@ -46,7 +46,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public ResponseUserDTO RegisterUser(CreateUserDTO createUserDTO) {
-        //System.out.println(createUserDTO);
         User createdUser = createUserFromDTO(createUserDTO);
 
         if(createdUser == null)
@@ -98,18 +97,15 @@ public class UserServiceImpl implements UserService {
         //check if both of their UserId is same.
         if((UpdatingUser.getUserId() != updateUserDTO.getUserId()))
         {
-            System.out.println(UpdatingUser.getUserId() + " Line 93 " + updateUserDTO.getUserId());
             throw new UserCreateException(String.format("User with User_Name already exists",updateUserDTO.getUserName()));
         }
 
-        System.out.println("Before Update : " +UpdatingUser);
 
         User UpdatedUserFromDto = getUserFromUpdateUserDTO(updateUserDTO,UpdatingUser);
 
 
         User updatedUser = userDao.updateUser(UpdatedUserFromDto);
 
-        System.out.println("After Update " + updatedUser);
 
         UserProfile userProfile = userProfileDAO.getUserProfileByUserId(updatedUser.getUserId());
 
@@ -154,7 +150,6 @@ public class UserServiceImpl implements UserService {
         {
             throw new UserCreateException(String.format("UserName %s not available",createUserDTO.getUserName()));
         }
-        System.out.println("Line 148");
         User user = new User();
         user.setFirstName(createUserDTO.getFirstName());
         user.setLastName(createUserDTO.getLastName());
@@ -173,7 +168,6 @@ public class UserServiceImpl implements UserService {
         {
             throw new UserCreateException("User Not created Exception");
         }
-        System.out.println("line 166 "+createdUser);
         return createdUser;
     }
 
@@ -185,9 +179,7 @@ public class UserServiceImpl implements UserService {
 
     private boolean isUserNameAvailable(String userName)
     {
-        System.out.println("Line 178 "+userName);
         User user = userDao.getUserByUserName(userName);
-        System.out.println("Line 180 "+user);
         return (user == null);
     }
 
@@ -215,15 +207,6 @@ public class UserServiceImpl implements UserService {
 
     private User getUserFromUpdateUserDTO(UpdateUserDTO updateUserDTO, User updatingUser)
     {
-        //The following Fields can be updated
-        //
-    /*
-        private String firstName;
-
-        private String lastName;
-
-        private String password;
-    */
 
         if(updateUserDTO.getFirstName() != null)
         {

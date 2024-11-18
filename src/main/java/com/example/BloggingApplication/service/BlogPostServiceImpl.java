@@ -118,10 +118,9 @@ public class BlogPostServiceImpl implements BlogService{
         List<ResponseBlogPostDTO> responsePosts = new ArrayList<>();
         for(BlogPost blogPost : blogPosts)
         {
-            System.out.println(blogPost);
             responsePosts.add(getResponsePost(blogPost));
         }
-        System.out.println(blogPosts.size());
+
         return responsePosts;
     }
 

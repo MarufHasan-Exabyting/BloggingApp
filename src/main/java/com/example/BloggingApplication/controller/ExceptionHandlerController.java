@@ -4,6 +4,7 @@ import com.example.BloggingApplication.dto.ApiResponse;
 import com.example.BloggingApplication.exception.*;
 import com.example.BloggingApplication.util.ResponseUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -34,7 +35,6 @@ public class ExceptionHandlerController {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ApiResponse<Object> handleValidationException(MethodArgumentNotValidException methodArgumentNotValidException, HttpServletRequest request)
     {
-        //System.out.println("Validation Error");
         List<String> errors = new ArrayList<>();
 
         methodArgumentNotValidException.getAllErrors().forEach(error -> {
@@ -78,5 +78,11 @@ public class ExceptionHandlerController {
     public ApiResponse<Object> handleAuthorizatioinException(AuthorizationException authorizationException, HttpServletRequest request)
     {
         return ResponseUtil.error(Arrays.asList(authorizationException.getMessage()),"do not have authorization",400, request.getRequestURI());
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ApiResponse<Object> handleUsernameNotFoundException(UsernameNotFoundException usernameNotFoundException, HttpServletRequest request)
+    {
+        return ResponseUtil.error(Arrays.asList(usernameNotFoundException.getMessage()),"user Name not found",400, request.getRequestURI());
     }
 }

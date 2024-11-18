@@ -14,6 +14,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -23,13 +24,12 @@ import java.io.IOException;
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
-    //To Do
-    //Exception Must be handled in case of not matching JWT token
     @Autowired
     private JWTService jwtService;
 
     @Autowired
     ApplicationContext applicationContext;
+
 
 
     @Override
@@ -47,7 +47,18 @@ public class JwtFilter extends OncePerRequestFilter {
         }
         if(userName != null && SecurityContextHolder.getContext().getAuthentication() == null)
         {
-            UserDetails userDetails = applicationContext.getBean(BlogUserDetailsService.class).loadUserByUsername(userName);
+            UserDetails userDetails = null;
+            try
+            {
+                userDetails = applicationContext.getBean(BlogUserDetailsService.class).loadUserByUsername(userName);
+            }
+            catch (UsernameNotFoundException e)
+            {
+               response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+               response.getWriter().write(e.getMessage());
+               return;
+            }
+
             role = jwtService.extractRole(token);
 
             boolean isAuthorize = Utility.checkRoleAuthroization(role,request.getRequestURI());

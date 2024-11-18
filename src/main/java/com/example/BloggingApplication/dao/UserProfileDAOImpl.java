@@ -88,7 +88,6 @@ public class UserProfileDAOImpl implements UserProfileDAO{
 
     private User getUserByUserId(int userId)
     {
-        //System.out.println("Get User BY User Id line 88");
         String query = Common.getDynamicQuery(User.class,"userId",userId);
         List<User> deletedUsers = (entityManager.createQuery(query, User.class)).getResultList();
         if(deletedUsers.isEmpty())
@@ -100,7 +99,6 @@ public class UserProfileDAOImpl implements UserProfileDAO{
 
     private UserProfile getUserProfileByUser(User deletedUser)
     {
-        System.out.println("Here getUserPrfileByUser ");
         TypedQuery<UserProfile> userProfileTypedQuery = (entityManager.createQuery("From UserProfile where createdBy = :deletedUser and metadata.isDeleted = false",UserProfile.class));
         userProfileTypedQuery.setParameter("deletedUser",deletedUser);
         List<UserProfile> userProfiles =  userProfileTypedQuery.getResultList();

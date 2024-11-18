@@ -20,9 +20,8 @@ public class BlogUserDetailsService implements UserDetailsService {
         User user = userDAO.getUserByUserName(username);
         if(user == null)
         {
-            throw new UserNotFoundException(String.format("User with User Name %s not found",username));
+            throw new UsernameNotFoundException(String.format("User with userName %s not found",username));
         }
-        System.out.println(user);
         return new UserPrincipal(user);
     }
 }

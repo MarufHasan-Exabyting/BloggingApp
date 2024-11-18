@@ -35,7 +35,6 @@ public class UserController {
     @PostMapping("/users/login")
     public String logInUser(@Valid @RequestBody LogInDTO logInDTO)
     {
-        System.out.println(logInDTO);
         return userService.verifyLogin(logInDTO);
     }
 
