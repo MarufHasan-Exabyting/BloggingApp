@@ -11,16 +11,11 @@ public class UpdatePostDTO {
     @NotNull
     private int postId;
 
-    @NotEmpty(message = "Title must not be empty")
-    @Size(min = 3, max = 100,message = "The length of the title should be between 3 to 100")
-    private String postTitle;
-
     @Positive(message = "AuthorId must be positive integer")
     private int postAuthorId;
 
+    private String postTitle;
 
-    @NotEmpty(message = "BlogContent should not be empty")
-    @Size(min = 5, max = 5000,message = "The length of the title should be between 3 to 5000")
     private String content;
 
     private String category;

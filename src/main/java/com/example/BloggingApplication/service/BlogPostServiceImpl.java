@@ -5,6 +5,7 @@ import com.example.BloggingApplication.dao.UserProfileDAO;
 import com.example.BloggingApplication.dto.CreatePostDTO;
 import com.example.BloggingApplication.dto.ResponseBlogPostDTO;
 import com.example.BloggingApplication.dto.UpdatePostDTO;
+import com.example.BloggingApplication.exception.BlogPostCreateException;
 import com.example.BloggingApplication.model.BlogPost;
 import com.example.BloggingApplication.model.EntityMetadata;
 import com.example.BloggingApplication.model.UserProfile;
@@ -91,15 +92,36 @@ public class BlogPostServiceImpl implements BlogService{
     private BlogPost toBlogPost(UpdatePostDTO updatePostDTO)
     {
         int postAuthorId = updatePostDTO.getPostAuthorId();
-
         BlogPost blogPost = blogDAO.getPostById(updatePostDTO.getPostId());
 
-        blogPost.setPostId(updatePostDTO.getPostId());
-        blogPost.setPostTitle(updatePostDTO.getPostTitle());
-        blogPost.setPostAuthorId(getUserProfileByUserId(postAuthorId));
-        blogPost.setContent(updatePostDTO.getContent());
-        blogPost.setCategory(updatePostDTO.getCategory());
+        System.out.println("Before Update: "+ blogPost);
 
+        //update title if not null
+        if(updatePostDTO.getPostTitle() != null)
+        {
+            if(updatePostDTO.getPostTitle().length() >100 || updatePostDTO.getPostTitle().length()<3)
+            {
+                throw new BlogPostCreateException("The length of the Title should be between 3 to 100");
+            }
+            blogPost.setPostTitle(updatePostDTO.getPostTitle());
+        }
+
+        //update content if not null
+        if(updatePostDTO.getContent() != null)
+        {
+            if(updatePostDTO.getContent().length() > 5000 || updatePostDTO.getContent().length() <5)
+            {
+                throw new BlogPostCreateException("BlogPost content should be less than 5000 and more than 5 characters");
+            }
+            blogPost.setContent(updatePostDTO.getContent());
+        }
+
+        //update category if not null
+        if(updatePostDTO.getCategory() != null)
+        {
+            blogPost.setCategory(updatePostDTO.getCategory());
+        }
+        System.out.println("After Update: "+blogPost);
         return blogPost;
     }
 
