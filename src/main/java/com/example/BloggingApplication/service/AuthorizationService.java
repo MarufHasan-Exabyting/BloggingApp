@@ -4,6 +4,8 @@ import com.example.BloggingApplication.dao.BlogDAO;
 import com.example.BloggingApplication.dao.CommentDAO;
 import com.example.BloggingApplication.dao.UserDAO;
 import com.example.BloggingApplication.dao.UserProfileDAO;
+import com.example.BloggingApplication.exception.BlogPostNotFoundException;
+import com.example.BloggingApplication.exception.UserProfileNotFoundException;
 import com.example.BloggingApplication.model.*;
 import com.example.BloggingApplication.util.Utility;
 import jakarta.servlet.http.HttpServletRequest;
@@ -90,12 +92,22 @@ public class AuthorizationService {
 
         String commentatorFromRequest = jwtService.extractUserName(token);
         UserProfile userProfile = userProfileDAO.getUserProfileByUserProfileId(commentatorId);
+        if(userProfile == null)
+        {
+            throw new UserProfileNotFoundException(String.format("User Profile with Id %d not found",commentatorId));
+        }
         String userName = userProfile.getUserName();
         return userName.equals(commentatorFromRequest);
     }
 
     public boolean checkIfAuthorizeToUpdateComment(int commentId, HttpServletRequest request) {
         Comment comment = commentDAO.getCommentByCommentId(commentId);
+        BlogPost blogPost = comment.getBlogPost();
+        if(blogPost.getMetadata().getDeleted())
+        {
+            throw new BlogPostNotFoundException("Comment can not be updated as the related blog is deleted");
+        }
+
         UserProfile userProfile = comment.getCommentator();
         String userName = userProfile.getUserName();
         String token = Utility.getTokenFromRequest(request);
