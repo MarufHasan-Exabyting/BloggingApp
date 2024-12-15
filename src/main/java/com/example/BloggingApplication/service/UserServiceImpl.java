@@ -14,14 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -128,14 +127,24 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String verifyLogin(LogInDTO logInDTO) {
-        Authentication authentication = authenticationManager.
-                authenticate(new UsernamePasswordAuthenticationToken(logInDTO.getUserName(),logInDTO.getPassword()));
-        if(authentication.isAuthenticated())
+    public Map<String,String> verifyLogin(LogInDTO logInDTO) {
+        Map<String, String> loginResponse = new HashMap<>();
+        try
         {
-            return jwtService.generateToken(logInDTO.getUserName());
+            Authentication authentication = authenticationManager.
+                    authenticate(new UsernamePasswordAuthenticationToken(logInDTO.getUserName(),logInDTO.getPassword()));
+
+            if(authentication.isAuthenticated())
+            {
+                String jwtToken = jwtService.generateToken(logInDTO.getUserName());
+                loginResponse.put("Jwt Token ",jwtToken);
+            }
         }
-        return "fail";
+        catch (AuthenticationException authenticationException)
+        {
+            throw new com.example.BloggingApplication.exception.AuthenticationException(authenticationException.getMessage());
+        }
+        return loginResponse;
     }
 
     //Helper functions

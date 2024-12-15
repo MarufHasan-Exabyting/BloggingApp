@@ -68,4 +68,17 @@ public class ApiResponse<T> {
     public void setPath(String path) {
         this.path = path;
     }
+
+    @Override
+    public String toString() {
+        return "ApiResponse{" +
+                "success=" + success +
+                ", message='" + message + '\'' +
+                ", data=" + data +
+                ", errors=" + errors +
+                ", errorCode=" + errorCode +
+                ", timestamp=" + timestamp +
+                ", path='" + path + '\'' +
+                '}';
+    }
 }

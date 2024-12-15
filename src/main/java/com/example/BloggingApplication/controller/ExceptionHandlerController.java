@@ -85,4 +85,10 @@ public class ExceptionHandlerController {
     {
         return ResponseUtil.error(Arrays.asList(usernameNotFoundException.getMessage()),"user Name not found",400, request.getRequestURI());
     }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ApiResponse<Object> handleAuthenticationFailedException(AuthenticationException authenticationException, HttpServletRequest request)
+    {
+        return ResponseUtil.error(Arrays.asList(authenticationException.getMessage()),"user Name not found",400, request.getRequestURI());
+    }
 }

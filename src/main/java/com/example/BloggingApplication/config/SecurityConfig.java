@@ -35,7 +35,12 @@ public class SecurityConfig {
 
         return httpSecurity.csrf(customizer -> customizer.disable()) //disable CSRF token
                     .authorizeHttpRequests(request -> request
-                    .requestMatchers("api/v1/users/register","api/v1/users/login")
+                    .requestMatchers(
+                            "api/v1/users/register",
+                            "api/v1/users/login",
+                            "/v3/api-docs/**",
+                            "/swagger-ui/**"
+                            )
                     .permitAll()
                     .requestMatchers("*/admin/*").hasAnyAuthority("ROLE_ADMIN")
                     .anyRequest().authenticated())

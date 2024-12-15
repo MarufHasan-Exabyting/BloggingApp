@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/v1/")
@@ -33,9 +34,9 @@ public class UserController {
     }
 
     @PostMapping("/users/login")
-    public String logInUser(@Valid @RequestBody LogInDTO logInDTO)
+    public ResponseEntity<ApiResponse<Map<String,String>>> logInUser(@Valid @RequestBody LogInDTO logInDTO, HttpServletRequest request)
     {
-        return userService.verifyLogin(logInDTO);
+        return ResponseEntity.ok(ResponseUtil.success(userService.verifyLogin(logInDTO),"UserName and Password Verification",request.getRequestURI()));
     }
 
     @GetMapping("/admin/users")

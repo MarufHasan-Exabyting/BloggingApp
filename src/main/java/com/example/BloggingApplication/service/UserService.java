@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 
 
 import java.util.List;
+import java.util.Map;
 
 public interface UserService {
     public ResponseUserDTO RegisterUser(CreateUserDTO user);
@@ -20,5 +21,5 @@ public interface UserService {
 
     public int deleteUser(int id);
 
-    String verifyLogin(@Valid LogInDTO logInDTO);
+    Map<String,String> verifyLogin(@Valid LogInDTO logInDTO);
 }

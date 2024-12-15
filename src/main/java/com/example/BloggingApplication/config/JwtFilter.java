@@ -1,6 +1,7 @@
 package com.example.BloggingApplication.config;
 
 
+import com.example.BloggingApplication.exception.AuthenticationException;
 import com.example.BloggingApplication.model.Role;
 import com.example.BloggingApplication.service.BlogUserDetailsService;
 import com.example.BloggingApplication.service.JWTService;
@@ -71,6 +72,14 @@ public class JwtFilter extends OncePerRequestFilter {
                 usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
             }
+            else
+            {
+               // response.getWriter().write("User Name verification failed");
+            }
+        }
+        else
+        {
+           // response.getWriter().write("Authentication Failed");
         }
         filterChain.doFilter(request, response);
     }
